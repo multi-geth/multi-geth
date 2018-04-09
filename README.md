@@ -105,6 +105,21 @@ This command will:
    connecting to Ethereum Classic network.
  * Default data directory will be `~/.ethereum/classic`.
 
+### Full node on the main [Ethereum Social](https://ethereumsocial.kr) network
+
+To get on Ethereum Social network and take advantage of fast-sync:
+
+```
+$ geth --social console
+```
+
+This command will:
+
+ * Start geth in fast sync mode and start up geth's built-in interactive JavaScript console,
+   connecting to Ethereum Social network.
+ * Default data directory will be `~/.ethereum/social`.
+ * If you want to use console externally, connect geth via geth attach ipc://<home dir>/.ethereum/social/geth.ipc
+
 ### All networks
 
 For a full list of networks supported by multi-geth, take a look at the command-line help messages:
