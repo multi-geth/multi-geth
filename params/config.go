@@ -49,6 +49,7 @@ var (
 		DisposalBlock:       nil,
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
+		MixBlock:            nil,
 		ConstantinopleBlock: nil,
 		Ethash:              new(EthashConfig),
 	}
@@ -67,6 +68,7 @@ var (
 		DisposalBlock:       big.NewInt(0),
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
+		MixBlock:            nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(10000000),
 		EIP160Block:         big.NewInt(0),
@@ -87,6 +89,7 @@ var (
 		DisposalBlock:       big.NewInt(5900000),
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
+		MixBlock:            nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160Block:         big.NewInt(3000000),
@@ -109,6 +112,7 @@ var (
 		DisposalBlock:       big.NewInt(0),
 		SocialBlock:         big.NewInt(0),
 		EthersocialBlock:    nil,
+		MixBlock:            nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160Block:         big.NewInt(0),
@@ -134,10 +138,11 @@ var (
 		EIP150Hash:          common.HexToHash("0x4fa57903dad05875ddf78030c16b5da886f7d81714cf66946a4c02566dbb2af5"),
 		EIP155Block:         big.NewInt(0),
 		EIP158Block:         big.NewInt(0),
-		ByzantiumBlock:      nil,
+		ByzantiumBlock:      big.NewInt(3000000),
 		DisposalBlock:       nil,
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
+		MixBlock:            big.NewInt(3000000),
 		ConstantinopleBlock: nil,
 		EIP160Block:         big.NewInt(0),
 	}
@@ -156,6 +161,7 @@ var (
 		DisposalBlock:       nil,
 		SocialBlock:         nil,
 		EthersocialBlock:    big.NewInt(0),
+		MixBlock:            nil,
 		ConstantinopleBlock: nil,
 		Ethash:              new(EthashConfig),
 	}
@@ -174,6 +180,7 @@ var (
 		DisposalBlock:       nil,
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
+		MixBlock:            nil,
 		ConstantinopleBlock: big.NewInt(4230000),
 		Ethash:              new(EthashConfig),
 	}
@@ -201,6 +208,7 @@ var (
 		DisposalBlock:       nil,
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
+		MixBlock:            nil,
 		ConstantinopleBlock: nil,
 		Clique: &CliqueConfig{
 			Period: 15,
@@ -222,16 +230,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, nil, nil, new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, new(EthashConfig), nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, nil, nil, new(EthashConfig), nil}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, new(EthashConfig), nil}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -269,6 +277,7 @@ type ChainConfig struct {
 	DisposalBlock    *big.Int `json:"disposalBlock,omitempty"` // Bomb disposal HF block
 	SocialBlock      *big.Int `json:"socialBlock,omitempty"`   // Ethereum Social Reward block
 	EthersocialBlock *big.Int `json:"ethersocialBlock,omitempty"`   // Ethersocial Reward block
+	MixBlock         *big.Int `json:"mixBlock,omitempty"`      // Mix difficulty and reward block
 
 	ByzantiumBlock      *big.Int `json:"byzantiumBlock,omitempty"`      // Byzantium switch block (nil = no fork, 0 = already on byzantium)
 	ConstantinopleBlock *big.Int `json:"constantinopleBlock,omitempty"` // Constantinople switch block (nil = no fork, 0 = already activated)
@@ -315,7 +324,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Disposal: %v Social: %v Ethersocial: %v ECIP1017: %v EIP160: %v ECIP1010PauseBlock: %v ECIP1010Length: %v Constantinople: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Disposal: %v Social: %v Ethersocial: %v Mix: %v ECIP1017: %v EIP160: %v ECIP1010PauseBlock: %v ECIP1010Length: %v Constantinople: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -327,6 +336,7 @@ func (c *ChainConfig) String() string {
 		c.DisposalBlock,
 		c.SocialBlock,
 		c.EthersocialBlock,
+		c.MixBlock,
 		c.ECIP1017EraRounds,
 		c.EIP160Block,
 		c.ECIP1010PauseBlock,
@@ -395,6 +405,10 @@ func (c *ChainConfig) IsSocial(num *big.Int) bool {
 
 func (c *ChainConfig) IsEthersocial(num *big.Int) bool {
 	return isForked(c.EthersocialBlock, num)
+}
+
+func (c *ChainConfig) IsMix(num *big.Int) bool {
+	return isForked(c.MixBlock, num)
 }
 
 func (c *ChainConfig) IsECIP1010(num *big.Int) bool {
