@@ -165,13 +165,15 @@ search:
 			// digest, result := hashimotoFull(dataset.dataset, hash, nonce)
 			sha := sha3.NewLegacyKeccak256()
 			sha.Write([]byte(hash))
-			digest := sha.Sum(nil)
+			result := sha.Sum(nil)
 
-			if new(big.Int).Cmp(target) <= 0 {
+			// if the result is bigger than the target
+			if new(big.Int).SetBytes(result).Cmp(target) == 1 {
 				// Correct nonce found, create a new header with it
 				header = types.CopyHeader(header)
 				header.Nonce = types.EncodeNonce(nonce)
-				header.MixDigest = common.BytesToHash(digest)
+				// Create an empty 256 bit mig digest
+				header.MixDigest = common.BytesToHash(make([]byte, 32))
 
 				// Seal and return a block (if still needed)
 				select {
