@@ -79,7 +79,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MixFlag,
 			utils.EthersocialFlag,
 			utils.RinkebyFlag,
-			utils.KeccakFlag,
+			utils.AstorFlag,
 			utils.SyncModeFlag,
 			utils.GCModeFlag,
 			utils.EthStatsURLFlag,

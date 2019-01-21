@@ -32,7 +32,7 @@ var (
 	MixGenesisHash         = common.HexToHash("0x4fa57903dad05875ddf78030c16b5da886f7d81714cf66946a4c02566dbb2af5")
 	EthersocialGenesisHash = common.HexToHash("0x310dd3c4ae84dd89f1b46cfdd5e26c8f904dfddddc73f323b468127272e20e9f")
 	RinkebyGenesisHash     = common.HexToHash("0x6341fd3daf94b748c72ced5a5b26028f2474f5f00d824504e4fa37a75767e177")
-	KeccakGenesisHash      = common.HexToHash("0xb75e5aceab7ec09ec4e94afb3e683bcc4e707a3c0958ad2d775d1ea936d7f232")
+	AstorGenesisHash       = common.HexToHash("0xb75e5aceab7ec09ec4e94afb3e683bcc4e707a3c0958ad2d775d1ea936d7f232")
 )
 
 var (
@@ -218,8 +218,8 @@ var (
 		BloomRoot:    common.HexToHash("0xff45a6f807138a2cde0cea0c209d9ce5ad8e43ccaae5a7c41af801bb72a1ef96"),
 	}
 
-	// KeccakChainConfig is the chain parameters to run a node on the Ethereum Classic main network.
-	KeccakChainConfig = &ChainConfig{
+	// AstorChainConfig is the chain parameters to run a node on the Ethereum Classic main network.
+	AstorChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(5),
 		HomesteadBlock:      big.NewInt(1150000),
 		DAOForkBlock:        big.NewInt(1920000),
@@ -237,7 +237,7 @@ var (
 		EIP160Block:         big.NewInt(3000000),
 		ECIP1010PauseBlock:  big.NewInt(3000000),
 		ECIP1010Length:      big.NewInt(2000000),
-		Ethash:              new(EthashConfig),
+		Keccak:              new(KeccakConfig),
 	}
 
 	// AllEthashProtocolChanges contains every protocol change (EIPs) introduced
@@ -245,16 +245,18 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, new(EthashConfig), nil}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, new(EthashConfig), nil, nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, new(EthashConfig), nil}
+	AllKeccakProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, nil, new(KeccakConfig)}
+
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), nil, nil, nil, big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, new(EthashConfig), nil, nil}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -306,6 +308,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+	Keccak *KeccakConfig `json:"keccak,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -325,6 +328,15 @@ type CliqueConfig struct {
 // String implements the stringer interface, returning the consensus engine details.
 func (c *CliqueConfig) String() string {
 	return "clique"
+}
+
+// KeccakConfig is the consensus engine configs for proof-of-work based sealing.
+type KeccakConfig struct {
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (c *KeccakConfig) String() string {
+	return "keccak"
 }
 
 // String implements the fmt.Stringer interface.

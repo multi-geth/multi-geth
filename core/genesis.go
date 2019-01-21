@@ -407,10 +407,10 @@ func DefaultRinkebyGenesisBlock() *Genesis {
 	}
 }
 
-// DefaultKeccakGenesisBlock returns the Keccak network genesis block.
-func DefaultKeccakGenesisBlock() *Genesis {
+// DefaultAstorGenesisBlock returns the Astor network genesis block.
+func DefaultAstorGenesisBlock() *Genesis {
 	return &Genesis{
-		Config:     params.KeccakChainConfig,
+		Config:     params.AstorChainConfig,
 		Timestamp:  1546461831,
 		ExtraData:  hexutil.MustDecode("0x2249276d20646f6e652077616974696e672e2e2e20666f7220626c6f636b2066696e616c69747922202d2049676779270000000001fa1804c408085d9c57eeb167ce953c99b6cb1e20794Fd02933F303FbA550bd1fe2f0649E3576eB0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   10485760,

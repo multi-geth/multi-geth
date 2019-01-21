@@ -160,9 +160,9 @@ var (
 		Name:  "rinkeby",
 		Usage: "Rinkeby network: pre-configured proof-of-authority test network",
 	}
-	KeccakFlag = cli.BoolFlag{
-		Name:  "keccak",
-		Usage: "Keccak network: proof of work network using Keccak256",
+	AstorFlag = cli.BoolFlag{
+		Name:  "astor",
+		Usage: "Astor network: pre-configured Keccak256 proof of work network",
 	}
 	ConstantinopleOverrideFlag = cli.Uint64Flag{
 		Name:  "override.constantinople",
@@ -686,8 +686,8 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(RinkebyFlag.Name) {
 			return filepath.Join(path, "rinkeby")
 		}
-		if ctx.GlobalBool(KeccakFlag.Name) {
-			return filepath.Join(path, "keccak")
+		if ctx.GlobalBool(AstorFlag.Name) {
+			return filepath.Join(path, "astor")
 		}
 		return path
 	}
@@ -753,8 +753,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.EthersocialBootnodes
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		urls = params.RinkebyBootnodes
-	case ctx.GlobalBool(KeccakFlag.Name):
-		urls = params.KeccakBootnodes
+	case ctx.GlobalBool(AstorFlag.Name):
+		urls = params.AstorBootnodes
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
@@ -782,8 +782,8 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		urls = params.RinkebyBootnodes
-	case ctx.GlobalBool(KeccakFlag.Name):
-		urls = params.KeccakBootnodes
+	case ctx.GlobalBool(AstorFlag.Name):
+		urls = params.AstorBootnodes
 	case cfg.BootstrapNodesV5 != nil:
 		return // already set, don't apply defaults.
 	}
@@ -1069,8 +1069,8 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "ethersocial")
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "rinkeby")
-	case ctx.GlobalBool(KeccakFlag.Name):
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "keccak")
+	case ctx.GlobalBool(AstorFlag.Name):
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "astor")
 	}
 }
 
@@ -1227,7 +1227,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, EllaismFlag, KeccakFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, EllaismFlag, AstorFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	if ctx.GlobalIsSet(EllaismFlag.Name) {
@@ -1355,11 +1355,11 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 76
 		}
 		cfg.Genesis = core.DefaultMixGenesisBlock()
-	case ctx.GlobalBool(KeccakFlag.Name):
+	case ctx.GlobalBool(AstorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 5
 		}
-		cfg.Genesis = core.DefaultKeccakGenesisBlock()
+		cfg.Genesis = core.DefaultAstorGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
@@ -1510,8 +1510,8 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 		genesis = core.DefaultEthersocialGenesisBlock()
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		genesis = core.DefaultRinkebyGenesisBlock()
-	case ctx.GlobalBool(KeccakFlag.Name):
-		genesis = core.DefaultKeccakGenesisBlock()
+	case ctx.GlobalBool(AstorFlag.Name):
+		genesis = core.DefaultAstorGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}
