@@ -28,7 +28,7 @@ import (
 	"github.com/ethereum/go-ethereum/console"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/rpc"
-	"gopkg.in/urfave/cli.v1"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 var (
@@ -136,6 +136,8 @@ func remoteConsole(ctx *cli.Context) error {
 				path = filepath.Join(path, "mix")
 			} else if ctx.GlobalBool(utils.EthersocialFlag.Name) {
 				path = filepath.Join(path, "ethersocial")
+			} else if ctx.GlobalBool(utils.KeccakFlag.Name) {
+				path = filepath.Join(path, "keccak")
 			}
 		}
 		endpoint = fmt.Sprintf("%s/geth.ipc", path)

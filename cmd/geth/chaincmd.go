@@ -37,7 +37,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/trie"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"gopkg.in/urfave/cli.v1"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 var (
@@ -140,6 +140,7 @@ The export-preimages command export hash preimages to an RLP encoded stream`,
 			utils.SocialFlag,
 			utils.EthersocialFlag,
 			utils.RinkebyFlag,
+			utils.KeccakFlag,
 		},
 		Category: "BLOCKCHAIN COMMANDS",
 		Description: `

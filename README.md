@@ -120,6 +120,8 @@ For a full list of networks supported by multi-geth, take a look at the command-
 --mix                                MIX network: pre-configured MIX mainnet
 --ethersocial                        Ethersocial network: pre-configured Ethersocial mainnet
 --rinkeby                            Rinkeby network: pre-configured proof-of-authority test network
+--keccak                             Keccak network: Ethereum Classic testnet using Keccak256 as proof of work.
+
 ```
 
 ### Configuration
