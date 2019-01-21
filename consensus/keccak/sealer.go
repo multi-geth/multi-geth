@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ethash
+package keccak
 
 import (
 	"bytes"
@@ -48,36 +48,36 @@ var (
 
 // Seal implements consensus.Engine, attempting to find a nonce that satisfies
 // the block's difficulty requirements.
-func (ethash *asdasd) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
+func (keccak *Keccak) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
 	// If we're running a fake PoW, simply return a 0 nonce immediately
-	if ethash.config.PowMode == ModeFake || ethash.config.PowMode == ModeFullFake {
+	if keccak.config.PowMode == ModeFake || keccak.config.PowMode == ModeFullFake {
 		header := block.Header()
 		header.Nonce, header.MixDigest = types.BlockNonce{}, common.Hash{}
 		select {
 		case results <- block.WithSeal(header):
 		default:
-			log.Warn("Sealing result is not read by miner", "mode", "fake", "sealhash", ethash.SealHash(block.Header()))
+			log.Warn("Sealing result is not read by miner", "mode", "fake", "sealhash", keccak.SealHash(block.Header()))
 		}
 		return nil
 	}
 	// If we're running a shared PoW, delegate sealing to it
-	if ethash.shared != nil {
-		return ethash.shared.Seal(chain, block, results, stop)
+	if keccak.shared != nil {
+		return keccak.shared.Seal(chain, block, results, stop)
 	}
 	// Create a runner and the multiple search threads it directs
 	abort := make(chan struct{})
 
-	ethash.lock.Lock()
-	threads := ethash.threads
-	if ethash.rand == nil {
+	keccak.lock.Lock()
+	threads := keccak.threads
+	if keccak.rand == nil {
 		seed, err := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
 		if err != nil {
-			ethash.lock.Unlock()
+			keccak.lock.Unlock()
 			return err
 		}
-		ethash.rand = rand.New(rand.NewSource(seed.Int64()))
+		keccak.rand = rand.New(rand.NewSource(seed.Int64()))
 	}
-	ethash.lock.Unlock()
+	keccak.lock.Unlock()
 	if threads == 0 {
 		threads = runtime.NumCPU()
 	}
@@ -85,8 +85,8 @@ func (ethash *asdasd) Seal(chain consensus.ChainReader, block *types.Block, resu
 		threads = 0 // Allows disabling local mining without extra logic around local/remote
 	}
 	// Push new work to remote sealer
-	if ethash.workCh != nil {
-		ethash.workCh <- &sealTask{block: block, results: results}
+	if keccak.workCh != nil {
+		keccak.workCh <- &sealTask{block: block, results: results}
 	}
 	var (
 		pend   sync.WaitGroup
@@ -96,8 +96,8 @@ func (ethash *asdasd) Seal(chain consensus.ChainReader, block *types.Block, resu
 		pend.Add(1)
 		go func(id int, nonce uint64) {
 			defer pend.Done()
-			ethash.mine(block, id, nonce, abort, locals)
-		}(i, uint64(ethash.rand.Int63()))
+			keccak.mine(block, id, nonce, abort, locals)
+		}(i, uint64(keccak.rand.Int63()))
 	}
 	// Wait until sealing is terminated or a nonce is found
 	go func() {
@@ -111,13 +111,13 @@ func (ethash *asdasd) Seal(chain consensus.ChainReader, block *types.Block, resu
 			select {
 			case results <- result:
 			default:
-				log.Warn("Sealing result is not read by miner", "mode", "local", "sealhash", ethash.SealHash(block.Header()))
+				log.Warn("Sealing result is not read by miner", "mode", "local", "sealhash", keccak.SealHash(block.Header()))
 			}
 			close(abort)
-		case <-ethash.update:
+		case <-keccak.update:
 			// Thread count was changed on user request, restart
 			close(abort)
-			if err := ethash.Seal(chain, block, results, stop); err != nil {
+			if err := keccak.Seal(chain, block, results, stop); err != nil {
 				log.Error("Failed to restart sealing after update", "err", err)
 			}
 		}
@@ -129,14 +129,13 @@ func (ethash *asdasd) Seal(chain consensus.ChainReader, block *types.Block, resu
 
 // mine is the actual proof-of-work miner that searches for a nonce starting from
 // seed that results in correct final block difficulty.
-func (ethash *Ethash) mine(block *types.Block, id int, seed uint64, abort chan struct{}, found chan *types.Block) {
+func (keccak *Keccak) mine(block *types.Block, id int, seed uint64, abort chan struct{}, found chan *types.Block) {
 	// Extract some data from the header
 	var (
-		header  = block.Header()
-		hash    = ethash.SealHash(header).Bytes()
-		target  = new(big.Int).Div(two256, header.Difficulty)
-		number  = header.Number.Uint64()
-		dataset = ethash.dataset(number, false)
+		header = block.Header()
+		hash   = keccak.SealHash(header).Bytes()
+		target = new(big.Int).Div(two256, header.Difficulty)
+		number = header.Number.Uint64()
 	)
 	// Start generating random nonces until we abort or find a good one
 	var (
@@ -144,25 +143,30 @@ func (ethash *Ethash) mine(block *types.Block, id int, seed uint64, abort chan s
 		nonce    = seed
 	)
 	logger := log.New("miner", id)
-	logger.Trace("Started ethash search for new nonces", "seed", seed)
+	logger.Trace("Started keccak search for new nonces", "seed", seed)
 search:
 	for {
 		select {
 		case <-abort:
 			// Mining terminated, update stats and abort
-			logger.Trace("Ethash nonce search aborted", "attempts", nonce-seed)
-			ethash.hashrate.Mark(attempts)
+			logger.Trace("Keccak nonce search aborted", "attempts", nonce-seed)
+			keccak.hashrate.Mark(attempts)
 			break search
 
 		default:
 			// We don't have to update hash rate on every nonce, so update after after 2^X nonces
 			attempts++
 			if (attempts % (1 << 15)) == 0 {
-				ethash.hashrate.Mark(attempts)
+				keccak.hashrate.Mark(attempts)
 				attempts = 0
 			}
+			// TODO THIS IS WHERE POW IS
 			// Compute the PoW value of this nonce
 			digest, result := hashimotoFull(dataset.dataset, hash, nonce)
+			// sha := sha3.NewLegacyKeccak256()
+			// sha.Write([]byte(unchecksummed))
+			// hash := sha.Sum(nil)
+
 			if new(big.Int).SetBytes(result).Cmp(target) <= 0 {
 				// Correct nonce found, create a new header with it
 				header = types.CopyHeader(header)
@@ -172,22 +176,19 @@ search:
 				// Seal and return a block (if still needed)
 				select {
 				case found <- block.WithSeal(header):
-					logger.Trace("Ethash nonce found and reported", "attempts", nonce-seed, "nonce", nonce)
+					logger.Trace("Keccak nonce found and reported", "attempts", nonce-seed, "nonce", nonce)
 				case <-abort:
-					logger.Trace("Ethash nonce found but discarded", "attempts", nonce-seed, "nonce", nonce)
+					logger.Trace("Keccak nonce found but discarded", "attempts", nonce-seed, "nonce", nonce)
 				}
 				break search
 			}
 			nonce++
 		}
 	}
-	// Datasets are unmapped in a finalizer. Ensure that the dataset stays live
-	// during sealing so it's not unmapped while being read.
-	runtime.KeepAlive(dataset)
 }
 
 // remote is a standalone goroutine to handle remote mining related stuff.
-func (ethash *Ethash) remote(notify []string, noverify bool) {
+func (keccak *Keccak) remote(notify []string, noverify bool) {
 	var (
 		works = make(map[common.Hash]*types.Block)
 		rates = make(map[common.Hash]hashrate)
@@ -237,7 +238,7 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 	//   result[2], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
 	//   result[3], hex encoded block number
 	makeWork := func(block *types.Block) {
-		hash := ethash.SealHash(block.Header())
+		hash := keccak.SealHash(block.Header())
 
 		currentWork[0] = hash.Hex()
 		currentWork[1] = common.BytesToHash(SeedHash(block.NumberU64())).Hex()
@@ -269,14 +270,14 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 
 		start := time.Now()
 		if !noverify {
-			if err := ethash.verifySeal(nil, header, true); err != nil {
+			if err := keccak.verifySeal(nil, header); err != nil {
 				log.Warn("Invalid proof-of-work submitted", "sealhash", sealhash, "elapsed", time.Since(start), "err", err)
 				return false
 			}
 		}
 		// Make sure the result channel is assigned.
 		if results == nil {
-			log.Warn("Ethash result channel is empty, submitted mining result is rejected")
+			log.Warn("Keccak result channel is empty, submitted mining result is rejected")
 			return false
 		}
 		log.Trace("Verified correct proof-of-work", "sealhash", sealhash, "elapsed", time.Since(start))
@@ -305,7 +306,7 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 
 	for {
 		select {
-		case work := <-ethash.workCh:
+		case work := <-keccak.workCh:
 			// Update current work with new received block.
 			// Note same work can be past twice, happens when changing CPU threads.
 			results = work.results
@@ -315,7 +316,7 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 			// Notify and requested URLs of the new work availability
 			notifyWork()
 
-		case work := <-ethash.fetchWorkCh:
+		case work := <-keccak.fetchWorkCh:
 			// Return current mining work to remote miner.
 			if currentBlock == nil {
 				work.errc <- errNoMiningWork
@@ -323,7 +324,7 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 				work.res <- currentWork
 			}
 
-		case result := <-ethash.submitWorkCh:
+		case result := <-keccak.submitWorkCh:
 			// Verify submitted PoW solution based on maintained mining blocks.
 			if submitWork(result.nonce, result.mixDigest, result.hash) {
 				result.errc <- nil
@@ -331,12 +332,12 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 				result.errc <- errInvalidSealResult
 			}
 
-		case result := <-ethash.submitRateCh:
+		case result := <-keccak.submitRateCh:
 			// Trace remote sealer's hash rate by submitted value.
 			rates[result.id] = hashrate{rate: result.rate, ping: time.Now()}
 			close(result.done)
 
-		case req := <-ethash.fetchRateCh:
+		case req := <-keccak.fetchRateCh:
 			// Gather all hash rate submitted by remote sealer.
 			var total uint64
 			for _, rate := range rates {
@@ -361,10 +362,10 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 				}
 			}
 
-		case errc := <-ethash.exitCh:
+		case errc := <-keccak.exitCh:
 			// Exit remote loop if ethash is closed and return relevant error.
 			errc <- nil
-			log.Trace("Ethash remote sealer is exiting")
+			log.Trace("Keccak remote sealer is exiting")
 			return
 		}
 	}

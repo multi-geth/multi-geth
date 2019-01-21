@@ -1,4 +1,4 @@
-package ethash
+package keccak
 
 import (
 	"encoding/json"
