@@ -34,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+	"golang.org/x/crypto/sha3"
 )
 
 const (
@@ -135,7 +136,6 @@ func (keccak *Keccak) mine(block *types.Block, id int, seed uint64, abort chan s
 		header = block.Header()
 		hash   = keccak.SealHash(header).Bytes()
 		target = new(big.Int).Div(two256, header.Difficulty)
-		number = header.Number.Uint64()
 	)
 	// Start generating random nonces until we abort or find a good one
 	var (
@@ -162,12 +162,12 @@ search:
 			}
 			// TODO THIS IS WHERE POW IS
 			// Compute the PoW value of this nonce
-			digest, result := hashimotoFull(dataset.dataset, hash, nonce)
-			// sha := sha3.NewLegacyKeccak256()
-			// sha.Write([]byte(unchecksummed))
-			// hash := sha.Sum(nil)
+			// digest, result := hashimotoFull(dataset.dataset, hash, nonce)
+			sha := sha3.NewLegacyKeccak256()
+			sha.Write([]byte(hash))
+			digest := sha.Sum(nil)
 
-			if new(big.Int).SetBytes(result).Cmp(target) <= 0 {
+			if new(big.Int).Cmp(target) <= 0 {
 				// Correct nonce found, create a new header with it
 				header = types.CopyHeader(header)
 				header.Nonce = types.EncodeNonce(nonce)
@@ -234,16 +234,14 @@ func (keccak *Keccak) remote(notify []string, noverify bool) {
 	//
 	// The work package consists of 3 strings:
 	//   result[0], 32 bytes hex encoded current block header pow-hash
-	//   result[1], 32 bytes hex encoded seed hash used for DAG
-	//   result[2], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
-	//   result[3], hex encoded block number
+	//   result[1], 32 bytes hex encoded boundary condition ("target"), 2^256/difficulty
+	//   result[2], hex encoded block number
 	makeWork := func(block *types.Block) {
 		hash := keccak.SealHash(block.Header())
 
 		currentWork[0] = hash.Hex()
-		currentWork[1] = common.BytesToHash(SeedHash(block.NumberU64())).Hex()
-		currentWork[2] = common.BytesToHash(new(big.Int).Div(two256, block.Difficulty()).Bytes()).Hex()
-		currentWork[3] = hexutil.EncodeBig(block.Number())
+		currentWork[1] = common.BytesToHash(new(big.Int).Div(two256, block.Difficulty()).Bytes()).Hex()
+		currentWork[2] = hexutil.EncodeBig(block.Number())
 
 		// Trace the seal work fetched by remote sealer.
 		currentBlock = block

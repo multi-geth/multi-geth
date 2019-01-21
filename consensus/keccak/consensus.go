@@ -663,8 +663,6 @@ func (keccak *Keccak) verifySeal(chain consensus.ChainReader, header *types.Head
 	if header.Difficulty.Sign() <= 0 {
 		return errInvalidDifficulty
 	}
-	// Recompute the digest and PoW values
-	number := header.Number.Uint64()
 
 	var (
 		digest []byte
