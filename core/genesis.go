@@ -416,7 +416,7 @@ func DefaultAstorGenesisBlock() *Genesis {
 		GasLimit:   10485760,
 		Difficulty: big.NewInt(1),
 		// TODO Come up with new alloc data
-		Alloc: decodePrealloc(keccakAllocData),
+		Alloc: decodePrealloc(astorAllocData),
 	}
 }
 
