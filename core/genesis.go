@@ -412,7 +412,7 @@ func DefaultAstorGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.AstorChainConfig,
 		Timestamp:  1546461831,
-		ExtraData:  hexutil.MustDecode(""),
+		ExtraData:  hexutil.MustDecode("0x3535353535353535353535353535353535353535353535353535353535353535"),
 		GasLimit:   10485760,
 		Difficulty: big.NewInt(1),
 		// TODO Come up with new alloc data
