@@ -166,6 +166,7 @@ search:
 			sha := sha3.NewLegacyKeccak256()
 			sha.Write([]byte(hash))
 			result := sha.Sum(nil)
+			log.Info("XXXxxxxxxxxxxxxxxxxxxxMINING")
 
 			// if the result is bigger than the target
 			if new(big.Int).SetBytes(result).Cmp(target) == 1 {
