@@ -248,23 +248,23 @@ var (
 
 	// AstorChainConfig is the chain parameters to run a node on the Ethereum Classic main network.
 	AstorChainConfig = &ChainConfig{
-		ChainID:             big.NewInt(5),
-		HomesteadBlock:      big.NewInt(1150000),
-		DAOForkBlock:        big.NewInt(1920000),
+		ChainID:             big.NewInt(77),
+		HomesteadBlock:      big.NewInt(0),
+		DAOForkBlock:        big.NewInt(0),
 		DAOForkSupport:      false,
-		EIP150Block:         big.NewInt(2500000),
+		EIP150Block:         big.NewInt(0),
 		EIP150Hash:          common.HexToHash("0xca12c63534f565899681965528d536c52cb05b7c48e269c2a6cb77ad864d878a"),
-		EIP155Block:         big.NewInt(3000000),
+		EIP155Block:         big.NewInt(0),
 		EIP158Block:         nil,
 		ByzantiumBlock:      nil,
-		DisposalBlock:       big.NewInt(5900000),
+		DisposalBlock:       big.NewInt(0),
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
 		ConstantinopleBlock: nil,
-		ECIP1017EraRounds:   big.NewInt(5000000),
-		EIP160Block:         big.NewInt(3000000),
-		ECIP1010PauseBlock:  big.NewInt(3000000),
-		ECIP1010Length:      big.NewInt(2000000),
+		ECIP1017EraRounds:   big.NewInt(0),
+		EIP160Block:         big.NewInt(0),
+		ECIP1010PauseBlock:  big.NewInt(0),
+		ECIP1010Length:      big.NewInt(0),
 		Keccak:              new(KeccakConfig),
 	}
 
