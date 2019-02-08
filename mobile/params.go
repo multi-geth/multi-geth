@@ -86,9 +86,9 @@ func RinkebyGenesis() string {
 	return string(enc)
 }
 
-// AstorGenesis returns the JSON spec to use for the Astor test network
-func AstorGenesis() string {
-	enc, err := json.Marshal(core.DefaultAstorGenesisBlock())
+// KottiGenesis returns the JSON spec to use for the Kotti test network
+func KottiGenesis() string {
+	enc, err := json.Marshal(core.DefaultKottiGenesisBlock())
 	if err != nil {
 		panic(err)
 	}

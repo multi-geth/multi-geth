@@ -33,7 +33,7 @@ import (
 var AppHelpTemplate = `NAME:
    {{.App.Name}} - {{.App.Usage}}
 
-   Copyright 2013-2018 The go-ethereum Authors
+   Copyright 2013-2019 The go-ethereum Authors
 
 USAGE:
    {{.App.HelpName}} [options]{{if .App.Commands}} command [command options]{{end}} {{if .App.ArgsUsage}}{{.App.ArgsUsage}}{{else}}[arguments...]{{end}}
@@ -79,7 +79,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MixFlag,
 			utils.EthersocialFlag,
 			utils.RinkebyFlag,
-			utils.AstorFlag,
+			utils.KottiFlag,
 			utils.SyncModeFlag,
 			utils.GCModeFlag,
 			utils.EthStatsURLFlag,
@@ -235,7 +235,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MetricsInfluxDBDatabaseFlag,
 			utils.MetricsInfluxDBUsernameFlag,
 			utils.MetricsInfluxDBPasswordFlag,
-			utils.MetricsInfluxDBHostTagFlag,
+			utils.MetricsInfluxDBTagsFlag,
 		},
 	},
 	{

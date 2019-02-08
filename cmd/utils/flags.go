@@ -19,6 +19,7 @@ package utils
 
 import (
 	"crypto/ecdsa"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -129,7 +130,7 @@ var (
 	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
-		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby, 5=Keccak)",
+		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby, 6=Kotti)",
 		Value: eth.DefaultConfig.NetworkId,
 	}
 	TestnetFlag = cli.BoolFlag{
@@ -160,9 +161,9 @@ var (
 		Name:  "rinkeby",
 		Usage: "Rinkeby network: pre-configured proof-of-authority test network",
 	}
-	AstorFlag = cli.BoolFlag{
-		Name:  "astor",
-		Usage: "Astor network: pre-configured Keccak256 proof of work network",
+	KottiFlag = cli.BoolFlag{
+		Name:  "kotti",
+		Usage: "Kotti network: cross-client proof-of-authority test network",
 	}
 	ConstantinopleOverrideFlag = cli.Uint64Flag{
 		Name:  "override.constantinople",
@@ -185,6 +186,23 @@ var (
 		Usage: "Document Root for HTTPClient file scheme",
 		Value: DirectoryString{homeDir()},
 	}
+	ULCModeConfigFlag = cli.StringFlag{
+		Name:  "ulc.config",
+		Usage: "Config file to use for ultra light client mode",
+	}
+	OnlyAnnounceModeFlag = cli.BoolFlag{
+		Name:  "ulc.onlyannounce",
+		Usage: "ULC server sends announcements only",
+	}
+	ULCMinTrustedFractionFlag = cli.IntFlag{
+		Name:  "ulc.fraction",
+		Usage: "Minimum % of trusted ULC servers required to announce a new head",
+	}
+	ULCTrustedNodesFlag = cli.StringFlag{
+		Name:  "ulc.trusted",
+		Usage: "List of trusted ULC servers",
+	}
+
 	defaultSyncMode = eth.DefaultConfig.SyncMode
 	SyncModeFlag    = TextMarshalerFlag{
 		Name:  "syncmode",
@@ -459,6 +477,30 @@ var (
 		Usage: "HTTP-RPC server listening port",
 		Value: node.DefaultHTTPPort,
 	}
+	GraphQLEnabledFlag = cli.BoolFlag{
+		Name:  "graphql",
+		Usage: "Enable the GraphQL server",
+	}
+	GraphQLListenAddrFlag = cli.StringFlag{
+		Name:  "graphql.addr",
+		Usage: "GraphQL server listening interface",
+		Value: node.DefaultGraphQLHost,
+	}
+	GraphQLPortFlag = cli.IntFlag{
+		Name:  "graphql.port",
+		Usage: "GraphQL server listening port",
+		Value: node.DefaultGraphQLPort,
+	}
+	GraphQLCORSDomainFlag = cli.StringFlag{
+		Name:  "graphql.rpccorsdomain",
+		Usage: "Comma separated list of domains from which to accept cross origin requests (browser enforced)",
+		Value: "",
+	}
+	GraphQLVirtualHostsFlag = cli.StringFlag{
+		Name:  "graphql.rpcvhosts",
+		Usage: "Comma separated list of virtual hostnames from which to accept requests (server enforced). Accepts '*' wildcard.",
+		Value: strings.Join(node.DefaultConfig.HTTPVirtualHosts, ","),
+	}
 	RPCCORSDomainFlag = cli.StringFlag{
 		Name:  "rpccorsdomain",
 		Usage: "Comma separated list of domains from which to accept cross origin requests (browser enforced)",
@@ -638,14 +680,14 @@ var (
 		Usage: "Password to authorize access to the database",
 		Value: "test",
 	}
-	// The `host` tag is part of every measurement sent to InfluxDB. Queries on tags are faster in InfluxDB.
-	// It is used so that we can group all nodes and average a measurement across all of them, but also so
-	// that we can select a specific node and inspect its measurements.
+	// Tags are part of every measurement sent to InfluxDB. Queries on tags are faster in InfluxDB.
+	// For example `host` tag could be used so that we can group all nodes and average a measurement
+	// across all of them, but also so that we can select a specific node and inspect its measurements.
 	// https://docs.influxdata.com/influxdb/v1.4/concepts/key_concepts/#tag-key
-	MetricsInfluxDBHostTagFlag = cli.StringFlag{
-		Name:  "metrics.influxdb.host.tag",
-		Usage: "InfluxDB `host` tag attached to all measurements",
-		Value: "localhost",
+	MetricsInfluxDBTagsFlag = cli.StringFlag{
+		Name:  "metrics.influxdb.tags",
+		Usage: "Comma-separated InfluxDB tags (key/values) attached to all measurements",
+		Value: "host=localhost",
 	}
 
 	EWASMInterpreterFlag = cli.StringFlag{
@@ -686,8 +728,8 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(RinkebyFlag.Name) {
 			return filepath.Join(path, "rinkeby")
 		}
-		if ctx.GlobalBool(AstorFlag.Name) {
-			return filepath.Join(path, "astor")
+		if ctx.GlobalBool(KottiFlag.Name) {
+			return filepath.Join(path, "kotti")
 		}
 		return path
 	}
@@ -753,19 +795,21 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.EthersocialBootnodes
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		urls = params.RinkebyBootnodes
-	case ctx.GlobalBool(AstorFlag.Name):
-		urls = params.AstorBootnodes
+	case ctx.GlobalBool(KottiFlag.Name):
+		urls = params.KottiBootnodes
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
 
 	cfg.BootstrapNodes = make([]*enode.Node, 0, len(urls))
 	for _, url := range urls {
-		node, err := enode.ParseV4(url)
-		if err != nil {
-			log.Crit("Bootstrap URL invalid", "enode", url, "err", err)
+		if url != "" {
+			node, err := enode.ParseV4(url)
+			if err != nil {
+				log.Crit("Bootstrap URL invalid", "enode", url, "err", err)
+			}
+			cfg.BootstrapNodes = append(cfg.BootstrapNodes, node)
 		}
-		cfg.BootstrapNodes = append(cfg.BootstrapNodes, node)
 	}
 }
 
@@ -782,8 +826,8 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		urls = params.RinkebyBootnodes
-	case ctx.GlobalBool(AstorFlag.Name):
-		urls = params.AstorBootnodes
+	case ctx.GlobalBool(KottiFlag.Name):
+		urls = params.KottiBootnodes
 	case cfg.BootstrapNodesV5 != nil:
 		return // already set, don't apply defaults.
 	}
@@ -852,6 +896,24 @@ func setHTTP(ctx *cli.Context, cfg *node.Config) {
 	}
 }
 
+// setGraphQL creates the GraphQL listener interface string from the set
+// command line flags, returning empty if the GraphQL endpoint is disabled.
+func setGraphQL(ctx *cli.Context, cfg *node.Config) {
+	if ctx.GlobalBool(GraphQLEnabledFlag.Name) && cfg.GraphQLHost == "" {
+		cfg.GraphQLHost = "127.0.0.1"
+		if ctx.GlobalIsSet(GraphQLListenAddrFlag.Name) {
+			cfg.GraphQLHost = ctx.GlobalString(GraphQLListenAddrFlag.Name)
+		}
+	}
+	cfg.GraphQLPort = ctx.GlobalInt(GraphQLPortFlag.Name)
+	if ctx.GlobalIsSet(GraphQLCORSDomainFlag.Name) {
+		cfg.GraphQLCors = splitAndTrim(ctx.GlobalString(GraphQLCORSDomainFlag.Name))
+	}
+	if ctx.GlobalIsSet(GraphQLVirtualHostsFlag.Name) {
+		cfg.GraphQLVirtualHosts = splitAndTrim(ctx.GlobalString(GraphQLVirtualHostsFlag.Name))
+	}
+}
+
 // setWS creates the WebSocket RPC listener interface string from the set
 // command line flags, returning empty if the HTTP endpoint is disabled.
 func setWS(ctx *cli.Context, cfg *node.Config) {
@@ -882,6 +944,40 @@ func setIPC(ctx *cli.Context, cfg *node.Config) {
 		cfg.IPCPath = ""
 	case ctx.GlobalIsSet(IPCPathFlag.Name):
 		cfg.IPCPath = ctx.GlobalString(IPCPathFlag.Name)
+	}
+}
+
+// SetULC setup ULC config from file if given.
+func SetULC(ctx *cli.Context, cfg *eth.Config) {
+	// ULC config isn't loaded from global config and ULC config and ULC trusted nodes are not defined.
+	if cfg.ULC == nil && !(ctx.GlobalIsSet(ULCModeConfigFlag.Name) || ctx.GlobalIsSet(ULCTrustedNodesFlag.Name)) {
+		return
+	}
+	cfg.ULC = &eth.ULCConfig{}
+
+	path := ctx.GlobalString(ULCModeConfigFlag.Name)
+	if path != "" {
+		cfgData, err := ioutil.ReadFile(path)
+		if err != nil {
+			Fatalf("Failed to unmarshal ULC configuration: %v", err)
+		}
+
+		err = json.Unmarshal(cfgData, &cfg.ULC)
+		if err != nil {
+			Fatalf("Failed to unmarshal ULC configuration: %s", err.Error())
+		}
+	}
+
+	if trustedNodes := ctx.GlobalString(ULCTrustedNodesFlag.Name); trustedNodes != "" {
+		cfg.ULC.TrustedServers = strings.Split(trustedNodes, ",")
+	}
+
+	if trustedFraction := ctx.GlobalInt(ULCMinTrustedFractionFlag.Name); trustedFraction > 0 {
+		cfg.ULC.MinTrustedFraction = trustedFraction
+	}
+	if cfg.ULC.MinTrustedFraction <= 0 && cfg.ULC.MinTrustedFraction > 100 {
+		log.Error("MinTrustedFraction is invalid", "MinTrustedFraction", cfg.ULC.MinTrustedFraction, "Changed to default", eth.DefaultULCMinTrustedFraction)
+		cfg.ULC.MinTrustedFraction = eth.DefaultULCMinTrustedFraction
 	}
 }
 
@@ -1034,6 +1130,7 @@ func SetNodeConfig(ctx *cli.Context, cfg *node.Config) {
 	SetP2PConfig(ctx, &cfg.P2P)
 	setIPC(ctx, cfg)
 	setHTTP(ctx, cfg)
+	setGraphQL(ctx, cfg)
 	setWS(ctx, cfg)
 	setNodeUserIdent(ctx, cfg)
 	setDataDir(ctx, cfg)
@@ -1069,8 +1166,8 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "ethersocial")
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "rinkeby")
-	case ctx.GlobalBool(AstorFlag.Name):
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "astor")
+	case ctx.GlobalBool(KottiFlag.Name):
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "kotti")
 	}
 }
 
@@ -1227,7 +1324,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, EllaismFlag, AstorFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, EllaismFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	if ctx.GlobalIsSet(EllaismFlag.Name) {
@@ -1252,6 +1349,9 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	}
 	if ctx.GlobalIsSet(LightPeersFlag.Name) {
 		cfg.LightPeers = ctx.GlobalInt(LightPeersFlag.Name)
+	}
+	if ctx.GlobalIsSet(OnlyAnnounceModeFlag.Name) {
+		cfg.OnlyAnnounce = ctx.GlobalBool(OnlyAnnounceModeFlag.Name)
 	}
 	if ctx.GlobalIsSet(NetworkIdFlag.Name) {
 		cfg.NetworkId = ctx.GlobalUint64(NetworkIdFlag.Name)
@@ -1350,6 +1450,11 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 4
 		}
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
+	case ctx.GlobalBool(KottiFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 6
+		}
+		cfg.Genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(MixFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 76
@@ -1464,16 +1569,33 @@ func SetupMetrics(ctx *cli.Context) {
 			database     = ctx.GlobalString(MetricsInfluxDBDatabaseFlag.Name)
 			username     = ctx.GlobalString(MetricsInfluxDBUsernameFlag.Name)
 			password     = ctx.GlobalString(MetricsInfluxDBPasswordFlag.Name)
-			hosttag      = ctx.GlobalString(MetricsInfluxDBHostTagFlag.Name)
 		)
 
 		if enableExport {
+			tagsMap := SplitTagsFlag(ctx.GlobalString(MetricsInfluxDBTagsFlag.Name))
+
 			log.Info("Enabling metrics export to InfluxDB")
-			go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "geth.", map[string]string{
-				"host": hosttag,
-			})
+
+			go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "geth.", tagsMap)
 		}
 	}
+}
+
+func SplitTagsFlag(tagsFlag string) map[string]string {
+	tags := strings.Split(tagsFlag, ",")
+	tagsMap := map[string]string{}
+
+	for _, t := range tags {
+		if t != "" {
+			kv := strings.Split(t, "=")
+
+			if len(kv) == 2 {
+				tagsMap[kv[0]] = kv[1]
+			}
+		}
+	}
+
+	return tagsMap
 }
 
 // MakeChainDatabase open an LevelDB using the flags passed to the client and will hard crash if it fails.
@@ -1510,8 +1632,8 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 		genesis = core.DefaultEthersocialGenesisBlock()
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		genesis = core.DefaultRinkebyGenesisBlock()
-	case ctx.GlobalBool(AstorFlag.Name):
-		genesis = core.DefaultAstorGenesisBlock()
+	case ctx.GlobalBool(KottiFlag.Name):
+		genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}

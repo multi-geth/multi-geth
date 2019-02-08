@@ -72,7 +72,7 @@ func setupSim(serviceMap map[string]simulation.ServiceFunc) (int, int, *simulati
 func watchSim(sim *simulation.Simulation) (context.Context, context.CancelFunc) {
 	ctx, cancelSimRun := context.WithTimeout(context.Background(), 1*time.Minute)
 
-	if _, err := sim.WaitTillHealthy(ctx, 2); err != nil {
+	if _, err := sim.WaitTillHealthy(ctx); err != nil {
 		panic(err)
 	}
 
@@ -154,8 +154,6 @@ func sendSimTerminatedEvent(sim *simulation.Simulation) {
 //It also sends some custom events so that the frontend
 //can visualize messages like SendOfferedMsg, WantedHashesMsg, DeliveryMsg
 func TestSnapshotSyncWithServer(t *testing.T) {
-	//t.Skip("temporarily disabled as simulations.WaitTillHealthy cannot be trusted")
-
 	//define a wrapper object to be able to pass around data
 	wrapper := &netWrapper{}
 

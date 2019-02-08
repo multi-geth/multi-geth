@@ -183,6 +183,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, constant
 	newcfg := genesis.configOrDefault(stored)
 	if constantinopleOverride != nil {
 		newcfg.ConstantinopleBlock = constantinopleOverride
+		newcfg.PetersburgBlock = constantinopleOverride
 	}
 	storedcfg := rawdb.ReadChainConfig(db, stored)
 	if storedcfg == nil {
@@ -407,16 +408,15 @@ func DefaultRinkebyGenesisBlock() *Genesis {
 	}
 }
 
-// DefaultAstorGenesisBlock returns the Astor network genesis block.
-func DefaultAstorGenesisBlock() *Genesis {
+// DefaultKottiGenesisBlock returns the Kotti network genesis block.
+func DefaultKottiGenesisBlock() *Genesis {
 	return &Genesis{
-		Config:     params.AstorChainConfig,
+		Config:     params.KottiChainConfig,
 		Timestamp:  1546461831,
-		ExtraData:  hexutil.MustDecode("0x3535353535353535353535353535353535353535353535353535353535353535"),
+		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000025b7955e43adf9c2a01a9475908702cce67f302a6aaf8cba3c9255a2b863415d4db7bae4f4bbca020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   10485760,
 		Difficulty: big.NewInt(1),
-		// TODO Come up with new alloc data
-		Alloc: decodePrealloc(astorAllocData),
+		Alloc:      decodePrealloc(kottiAllocData),
 	}
 }
 

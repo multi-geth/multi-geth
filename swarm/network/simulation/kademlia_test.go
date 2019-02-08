@@ -28,7 +28,6 @@ import (
 )
 
 func TestWaitTillHealthy(t *testing.T) {
-
 	sim := New(map[string]ServiceFunc{
 		"bzz": func(ctx *adapters.ServiceContext, b *sync.Map) (node.Service, func(), error) {
 			addr := network.NewAddr(ctx.Config.Node())
@@ -54,7 +53,7 @@ func TestWaitTillHealthy(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
-	ill, err := sim.WaitTillHealthy(ctx, 2)
+	ill, err := sim.WaitTillHealthy(ctx)
 	if err != nil {
 		for id, kad := range ill {
 			t.Log("Node", id)
