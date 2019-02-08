@@ -39,7 +39,6 @@ var (
 	two256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
 
 	// sharedEthash is a full instance that can be shared between multiple users.
-	sharedKeccak = New(Config{"", 3, 0, "", 1, 0, ModeNormal}, nil, false)
 )
 
 // isLittleEndian returns whether the local system is running in little or big
@@ -59,17 +58,6 @@ const (
 	ModeFake
 	ModeFullFake
 )
-
-// Config are the configuration parameters of the ethash.
-type Config struct {
-	CacheDir       string
-	CachesInMem    int
-	CachesOnDisk   int
-	DatasetDir     string
-	DatasetsInMem  int
-	DatasetsOnDisk int
-	PowMode        Mode
-}
 
 // sealTask wraps a seal block with relative result channel for remote sealer thread.
 type sealTask struct {
@@ -104,8 +92,6 @@ type sealWork struct {
 // Ethash is a consensus engine based on proof-of-work implementing the ethash
 // algorithm.
 type Keccak struct {
-	config Config
-
 	// Mining related fields
 	rand     *rand.Rand    // Properly seeded random source for nonces
 	threads  int           // Number of threads to mine on if mining
@@ -132,9 +118,8 @@ type Keccak struct {
 // New creates a full sized ethash PoW scheme and starts a background thread for
 // remote mining, also optionally notifying a batch of remote services of new work
 // packages.
-func New(config Config, notify []string, noverify bool) *Keccak {
+func New(notify []string, noverify bool) *Keccak {
 	keccak := &Keccak{
-		config:       config,
 		update:       make(chan struct{}),
 		hashrate:     metrics.NewMeterForced(),
 		workCh:       make(chan *sealTask),
@@ -163,12 +148,6 @@ func NewTester(notify []string, noverify bool) *Keccak {
 	}
 	go keccak.remote(notify, noverify)
 	return keccak
-}
-
-// NewShared creates a full sized ethash PoW shared between all requesters running
-// in the same process.
-func NewShared() *Keccak {
-	return &Keccak{shared: sharedKeccak}
 }
 
 // Close closes the exit channel to notify all backend threads exiting.

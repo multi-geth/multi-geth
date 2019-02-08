@@ -88,10 +88,6 @@ func (keccak *Keccak) Author(header *types.Header) (common.Address, error) {
 // VerifyHeader checks whether a header conforms to the consensus rules of the
 // stock Ethereum ethash engine.
 func (keccak *Keccak) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
-	// If we're running a full engine faking, accept any input as valid
-	if keccak.config.PowMode == ModeFullFake {
-		return nil
-	}
 	// Short circuit if the header is known, or it's parent not
 	number := header.Number.Uint64()
 	if chain.GetHeader(header.Hash(), number) != nil {
@@ -110,7 +106,7 @@ func (keccak *Keccak) VerifyHeader(chain consensus.ChainReader, header *types.He
 // a results channel to retrieve the async verifications.
 func (keccak *Keccak) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
 	// If we're running a full engine faking, accept any input as valid
-	if keccak.config.PowMode == ModeFullFake || len(headers) == 0 {
+	if len(headers) == 0 {
 		abort, results := make(chan struct{}), make(chan error, len(headers))
 		for i := 0; i < len(headers); i++ {
 			results <- nil
@@ -189,10 +185,6 @@ func (keccak *Keccak) verifyHeaderWorker(chain consensus.ChainReader, headers []
 // VerifyUncles verifies that the given block's uncles conform to the consensus
 // rules of the stock Ethereum ethash engine.
 func (keccak *Keccak) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
-	// If we're running a full engine faking, accept any input as valid
-	if keccak.config.PowMode == ModeFullFake {
-		return nil
-	}
 	// Verify that there are at most 2 uncles included in this block
 	if len(block.Uncles()) > maxUncles {
 		return errTooManyUncles
@@ -647,14 +639,6 @@ func (keccak *Keccak) VerifySeal(chain consensus.ChainReader, header *types.Head
 // either using the usual ethash cache for it, or alternatively using a full DAG
 // to make remote mining fast.
 func (keccak *Keccak) verifySeal(chain consensus.ChainReader, header *types.Header) error {
-	// If we're running a fake PoW, accept any seal as valid
-	if keccak.config.PowMode == ModeFake || keccak.config.PowMode == ModeFullFake {
-		time.Sleep(keccak.fakeDelay)
-		if keccak.fakeFail == header.Number.Uint64() {
-			return errInvalidPoW
-		}
-		return nil
-	}
 	// If we're running a shared PoW, delegate verification to it
 	if keccak.shared != nil {
 		return keccak.shared.verifySeal(chain, header)
@@ -698,7 +682,7 @@ func (keccak *Keccak) Prepare(chain consensus.ChainReader, header *types.Header)
 func (keccak *Keccak) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 	// Accumulate any block and uncle rewards and commit the final state root
 	accumulateRewards(chain.Config(), state, header, uncles)
-	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+	header.Root = state.IntermediateRoot(chain.Config().IsEIP161F(header.Number))
 
 	// Header seems complete, assemble into a block and return
 	return types.NewBlock(header, txs, uncles, receipts), nil

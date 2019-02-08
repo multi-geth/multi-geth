@@ -51,16 +51,16 @@ var (
 // the block's difficulty requirements.
 func (keccak *Keccak) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
 	// If we're running a fake PoW, simply return a 0 nonce immediately
-	if keccak.config.PowMode == ModeFake || keccak.config.PowMode == ModeFullFake {
-		header := block.Header()
-		header.Nonce, header.MixDigest = types.BlockNonce{}, common.Hash{}
-		select {
-		case results <- block.WithSeal(header):
-		default:
-			log.Warn("Sealing result is not read by miner", "mode", "fake", "sealhash", keccak.SealHash(block.Header()))
-		}
-		return nil
-	}
+	// if keccak.config.PowMode == ModeFake || keccak.config.PowMode == ModeFullFake {
+	// 	header := block.Header()
+	// 	header.Nonce, header.MixDigest = types.BlockNonce{}, common.Hash{}
+	// 	select {
+	// 	case results <- block.WithSeal(header):
+	// 	default:
+	// 		log.Warn("Sealing result is not read by miner", "mode", "fake", "sealhash", keccak.SealHash(block.Header()))
+	// 	}
+	// 	return nil
+	// }
 	// If we're running a shared PoW, delegate sealing to it
 	if keccak.shared != nil {
 		return keccak.shared.Seal(chain, block, results, stop)
