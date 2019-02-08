@@ -141,6 +141,7 @@ The export-preimages command export hash preimages to an RLP encoded stream`,
 			utils.EthersocialFlag,
 			utils.RinkebyFlag,
 			utils.KottiFlag,
+			utils.AstorFlag,
 		},
 		Category: "BLOCKCHAIN COMMANDS",
 		Description: `

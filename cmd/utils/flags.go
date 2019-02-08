@@ -165,6 +165,10 @@ var (
 		Name:  "kotti",
 		Usage: "Kotti network: cross-client proof-of-authority test network",
 	}
+	AstorFlag = cli.BoolFlag{
+		Name:  "astor",
+		Usage: "Astor network: cross-client Keccak256 proof-of-work test network",
+	}
 	ConstantinopleOverrideFlag = cli.Uint64Flag{
 		Name:  "override.constantinople",
 		Usage: "Manually specify constantinople fork-block, overriding the bundled setting",
@@ -731,6 +735,9 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(KottiFlag.Name) {
 			return filepath.Join(path, "kotti")
 		}
+		if ctx.GlobalBool(AstorFlag.Name) {
+			return filepath.Join(path, "astor")
+		}
 		return path
 	}
 	Fatalf("Cannot determine default data directory, please set manually (--datadir)")
@@ -797,6 +804,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.RinkebyBootnodes
 	case ctx.GlobalBool(KottiFlag.Name):
 		urls = params.KottiBootnodes
+	case ctx.GlobalBool(AstorFlag.Name):
+		urls = params.AstorBootnodes
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
@@ -828,6 +837,8 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.RinkebyBootnodes
 	case ctx.GlobalBool(KottiFlag.Name):
 		urls = params.KottiBootnodes
+	case ctx.GlobalBool(AstorFlag.Name):
+		urls = params.AstorBootnodes
 	case cfg.BootstrapNodesV5 != nil:
 		return // already set, don't apply defaults.
 	}
@@ -1168,6 +1179,8 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "rinkeby")
 	case ctx.GlobalBool(KottiFlag.Name):
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "kotti")
+	case ctx.GlobalBool(AstorFlag.Name):
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "astor")
 	}
 }
 
@@ -1324,7 +1337,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, EllaismFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, AstorFlag, EllaismFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	if ctx.GlobalIsSet(EllaismFlag.Name) {
@@ -1455,16 +1468,16 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 6
 		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
+	case ctx.GlobalBool(AstorFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 77
+		}
+		cfg.Genesis = core.DefaultAstorGenesisBlock()
 	case ctx.GlobalBool(MixFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 76
 		}
 		cfg.Genesis = core.DefaultMixGenesisBlock()
-	case ctx.GlobalBool(AstorFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 5
-		}
-		cfg.Genesis = core.DefaultAstorGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
@@ -1634,6 +1647,8 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 		genesis = core.DefaultRinkebyGenesisBlock()
 	case ctx.GlobalBool(KottiFlag.Name):
 		genesis = core.DefaultKottiGenesisBlock()
+	case ctx.GlobalBool(AstorFlag.Name):
+		genesis = core.DefaultAstorGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}

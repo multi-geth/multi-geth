@@ -250,10 +250,10 @@ var (
 	AstorChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(77),
 		HomesteadBlock:      big.NewInt(0),
-		DAOForkBlock:        big.NewInt(0),
+		DAOForkBlock:        nil,
 		DAOForkSupport:      false,
 		EIP150Block:         big.NewInt(0),
-		EIP150Hash:          common.HexToHash("0xca12c63534f565899681965528d536c52cb05b7c48e269c2a6cb77ad864d878a"),
+		EIP150Hash:          common.HexToHash("0x14c2283285a88fe5fce9bf5c573ab03d6616695d717b12a127188bcacfc743c4"),
 		EIP155Block:         big.NewInt(0),
 		EIP158Block:         nil,
 		ByzantiumBlock:      nil,
@@ -261,10 +261,10 @@ var (
 		SocialBlock:         nil,
 		EthersocialBlock:    nil,
 		ConstantinopleBlock: nil,
-		ECIP1017EraRounds:   big.NewInt(0),
-		EIP160Block:         big.NewInt(0),
+		ECIP1017EraRounds:   big.NewInt(5000000),
+		EIP160FBlock:        big.NewInt(0),
 		ECIP1010PauseBlock:  big.NewInt(0),
-		ECIP1010Length:      big.NewInt(0),
+		ECIP1010Length:      big.NewInt(2000000),
 		Keccak:              new(KeccakConfig),
 	}
 
@@ -321,6 +321,7 @@ var (
 
 		new(EthashConfig), // Ethash
 		nil,               // Clique
+		nil,               // Keccak
 	}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
@@ -379,6 +380,7 @@ var (
 			Period: 0,
 			Epoch:  30000,
 		},
+		nil, // Keccak
 	}
 
 	// TestChainConfig is used for tests.
@@ -430,6 +432,7 @@ var (
 
 		new(EthashConfig), // Ethash
 		nil,               // Clique
+		nil,
 	}
 
 	// TestRules are all rules from TestChainConfig initialized at 0.
