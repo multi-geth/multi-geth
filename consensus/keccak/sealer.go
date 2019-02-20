@@ -163,8 +163,7 @@ search:
 			// TODO THIS IS WHERE POW IS
 			// Compute the PoW value of this nonce
 			// digest, result := hashimotoFull(dataset.dataset, hash, nonce)
-			sha := sha3.NewLegacyKeccak256()
-			sha.Write([]byte(hash))
+			sha := sha3.NewLegacyKeccak256().Write([]byte(hash))
 			result := sha.Sum(nil)
 			log.Info("XXXxxxxxxxxxxxxxxxxxxxMINING")
 

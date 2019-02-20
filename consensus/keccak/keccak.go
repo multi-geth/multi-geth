@@ -20,7 +20,6 @@ package keccak
 import (
 	"errors"
 	"math/big"
-	"math/rand"
 	"sync"
 	"time"
 	"unsafe"
@@ -67,9 +66,8 @@ type sealTask struct {
 
 // mineResult wraps the pow solution parameters for the specified block.
 type mineResult struct {
-	nonce     types.BlockNonce
-	mixDigest common.Hash
-	hash      common.Hash
+	nonce types.BlockNonce
+	hash  common.Hash
 
 	errc chan error
 }
@@ -93,7 +91,6 @@ type sealWork struct {
 // algorithm.
 type Keccak struct {
 	// Mining related fields
-	rand     *rand.Rand    // Properly seeded random source for nonces
 	threads  int           // Number of threads to mine on if mining
 	update   chan struct{} // Notification channel to update mining parameters
 	hashrate metrics.Meter // Meter tracking the average hashrate
