@@ -1177,6 +1177,7 @@ starts the simulation, waits for SyncUpdateDelay in order to kick off
 stream registration, then tests that there are subscriptions.
 */
 func TestGetSubscriptionsRPC(t *testing.T) {
+
 	// arbitrarily set to 4
 	nodeCount := 4
 	// run with more nodes if `longrunning` flag is set
