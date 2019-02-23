@@ -55,5 +55,3 @@ func (n noopMode) ApplyMode() error {
 func TerminalMode() (ModeApplier, error) {
 	return noopMode{}, nil
 }
-
-const cursorColumn = true

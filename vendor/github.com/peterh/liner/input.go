@@ -264,9 +264,9 @@ func (s *State) readNext() (interface{}, error) {
 						return pageUp, nil
 					case 6:
 						return pageDown, nil
-					case 1, 7:
+					case 7:
 						return home, nil
-					case 4, 8:
+					case 8:
 						return end, nil
 					case 15:
 						return f5, nil
@@ -328,9 +328,6 @@ func (s *State) readNext() (interface{}, error) {
 	case 'b':
 		s.pending = s.pending[:0] // escape code complete
 		return altB, nil
-	case 'd':
-		s.pending = s.pending[:0] // escape code complete
-		return altD, nil
 	case 'f':
 		s.pending = s.pending[:0] // escape code complete
 		return altF, nil
