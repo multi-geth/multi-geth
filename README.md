@@ -260,6 +260,12 @@ with it prior to starting it up to ensure all blockchain parameters are correctl
 $ geth init path/to/genesis.json
 ```
 
+To generate a properly encoded version of your genesis file you can run:
+
+```
+$ go run mkalloc.go path/to/genesis.json
+```
+
 #### Creating the rendezvous point
 
 With all nodes that you want to run initialized to the desired genesis state, you'll need to start a
@@ -345,4 +351,3 @@ The go-ethereum binaries (i.e. all code inside of the `cmd` directory) is licens
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), also included
 in our repository in the `COPYING` file.
 
-go run mkalloc.go ../genesis.json
