@@ -62,91 +62,101 @@ func instructionSetForConfig(config *params.ChainConfig, bn *big.Int) [256]opera
 	// Homestead
 	if config.IsEIP7F(bn) {
 		instructionSet[DELEGATECALL] = operation{
-			execute:       opDelegateCall,
-			gasCost:       gasDelegateCall,
-			validateStack: makeStackFunc(6, 1),
-			memorySize:    memoryDelegateCall,
-			valid:         true,
-			returns:       true,
+			execute:    opDelegateCall,
+			dynamicGas: gasDelegateCall,
+			minStack:   minStack(6, 1),
+			maxStack:   maxStack(6, 1),
+			memorySize: memoryDelegateCall,
+			valid:      true,
+			returns:    true,
 		}
 	}
 
 	// Byzantium
 	if config.IsEIP140F(bn) {
 		instructionSet[REVERT] = operation{
-			execute:       opRevert,
-			gasCost:       gasRevert,
-			validateStack: makeStackFunc(2, 0),
-			memorySize:    memoryRevert,
-			valid:         true,
-			reverts:       true,
-			returns:       true,
+			execute:    opRevert,
+			dynamicGas: gasRevert,
+			minStack:   minStack(2, 0),
+			maxStack:   maxStack(2, 0),
+			memorySize: memoryRevert,
+			valid:      true,
+			reverts:    true,
+			returns:    true,
 		}
 	}
 	if config.IsEIP214F(bn) {
 		instructionSet[STATICCALL] = operation{
-			execute:       opStaticCall,
-			gasCost:       gasStaticCall,
-			validateStack: makeStackFunc(6, 1),
-			memorySize:    memoryStaticCall,
-			valid:         true,
-			returns:       true,
+			execute:    opStaticCall,
+			dynamicGas: gasStaticCall,
+			minStack:   minStack(6, 1),
+			maxStack:   maxStack(6, 1),
+			memorySize: memoryStaticCall,
+			valid:      true,
+			returns:    true,
 		}
 	}
 	if config.IsEIP211F(bn) {
 		instructionSet[RETURNDATASIZE] = operation{
-			execute:       opReturnDataSize,
-			gasCost:       constGasFunc(GasQuickStep),
-			validateStack: makeStackFunc(0, 1),
-			valid:         true,
+			execute:     opReturnDataSize,
+			constantGas: GasQuickStep,
+			minStack:    minStack(0, 1),
+			maxStack:    maxStack(0, 1),
+			valid:       true,
 		}
 		instructionSet[RETURNDATACOPY] = operation{
-			execute:       opReturnDataCopy,
-			gasCost:       gasReturnDataCopy,
-			validateStack: makeStackFunc(3, 0),
-			memorySize:    memoryReturnDataCopy,
-			valid:         true,
+			execute:    opReturnDataCopy,
+			dynamicGas: gasReturnDataCopy,
+			minStack:   minStack(3, 0),
+			maxStack:   maxStack(3, 0),
+			memorySize: memoryReturnDataCopy,
+			valid:      true,
 		}
 	}
 
 	// Constantinople
 	if config.IsEIP145F(bn) {
 		instructionSet[SHL] = operation{
-			execute:       opSHL,
-			gasCost:       constGasFunc(GasFastestStep),
-			validateStack: makeStackFunc(2, 1),
-			valid:         true,
+			execute:     opSHL,
+			constantGas: GasFastestStep,
+			minStack:    minStack(2, 1),
+			maxStack:    maxStack(2, 1),
+			valid:       true,
 		}
 		instructionSet[SHR] = operation{
-			execute:       opSHR,
-			gasCost:       constGasFunc(GasFastestStep),
-			validateStack: makeStackFunc(2, 1),
-			valid:         true,
+			execute:     opSHR,
+			constantGas: GasFastestStep,
+			minStack:    minStack(2, 1),
+			maxStack:    maxStack(2, 1),
+			valid:       true,
 		}
 		instructionSet[SAR] = operation{
-			execute:       opSAR,
-			gasCost:       constGasFunc(GasFastestStep),
-			validateStack: makeStackFunc(2, 1),
-			valid:         true,
+			execute:     opSAR,
+			constantGas: GasFastestStep,
+			minStack:    minStack(2, 1),
+			maxStack:    maxStack(2, 1),
+			valid:       true,
 		}
 	}
 	if config.IsEIP1014F(bn) {
 		instructionSet[CREATE2] = operation{
-			execute:       opCreate2,
-			gasCost:       gasCreate2,
-			validateStack: makeStackFunc(4, 1),
-			memorySize:    memoryCreate2,
-			valid:         true,
-			writes:        true,
-			returns:       true,
+			execute:    opCreate2,
+			dynamicGas: gasCreate2,
+			minStack:   minStack(4, 1),
+			maxStack:   maxStack(4, 1),
+			memorySize: memoryCreate2,
+			valid:      true,
+			writes:     true,
+			returns:    true,
 		}
 	}
 	if config.IsEIP1052F(bn) {
 		instructionSet[EXTCODEHASH] = operation{
-			execute:       opExtCodeHash,
-			gasCost:       gasExtCodeHash,
-			validateStack: makeStackFunc(1, 1),
-			valid:         true,
+			execute:    opExtCodeHash,
+			dynamicGas: gasExtCodeHash,
+			minStack:   minStack(1, 1),
+			maxStack:   maxStack(1, 1),
+			valid:      true,
 		}
 	}
 	return instructionSet
