@@ -15,8 +15,9 @@ or a separate VM in a [QubesOS](https://www.qubes-os.org/) type os setup.
 Check out
 
 * the [tutorial](tutorial.md) for some concrete examples on how the signer works.
-* the [setup docs](docs/setup.md) for some information on how to configure it to work on QubesOS or USBArmory.
-
+* the [setup docs](docs/setup.md) for some information on how to configure it to work on QubesOS or USBArmory. 
+* the [data types](datatypes.md) for detailed information on the json types used in the communication between
+  clef and an external UI 
 
 ## Command line flags
 Clef accepts the following command line options:
@@ -24,28 +25,34 @@ Clef accepts the following command line options:
 COMMANDS:
    init    Initialize the signer, generate secret storage
    attest  Attest that a js-file is to be used
-   addpw   Store a credential for a keystore file
+   setpw   Store a credential for a keystore file
+   gendoc  Generate documentation about json-rpc format
    help    Shows a list of commands or help for one command
-
+   
 GLOBAL OPTIONS:
    --loglevel value        log level to emit to the screen (default: 4)
    --keystore value        Directory for the keystore (default: "$HOME/.ethereum/keystore")
-   --configdir value       Directory for clef configuration (default: "$HOME/.clef")
-   --networkid value       Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby, 6=Kotti) (default: 1)
+   --configdir value       Directory for Clef configuration (default: "$HOME/.clef")
+   --chainid value         Chain id to use for signing (1=mainnet, 3=ropsten, 4=rinkeby, 5=Goerli) (default: 1)
    --lightkdf              Reduce key-derivation RAM & CPU usage at some expense of KDF strength
    --nousb                 Disables monitoring for and managing USB hardware wallets
    --rpcaddr value         HTTP-RPC server listening interface (default: "localhost")
+   --rpcvhosts value       Comma separated list of virtual hostnames from which to accept requests (server enforced). Accepts '*' wildcard. (default: "localhost")
+   --ipcdisable            Disable the IPC-RPC server
+   --ipcpath               Filename for IPC socket/pipe within the datadir (explicit paths escape it)
+   --rpc                   Enable the HTTP-RPC server
    --rpcport value         HTTP-RPC server listening port (default: 8550)
-   --signersecret value    A file containing the password used to encrypt signer credentials, e.g. keystore credentials and ruleset hash
+   --signersecret value    A file containing the (encrypted) master seed to encrypt Clef data, e.g. keystore credentials and ruleset hash
    --4bytedb value         File containing 4byte-identifiers (default: "./4byte.json")
    --4bytedb-custom value  File used for writing new 4byte-identifiers submitted via API (default: "./4byte-custom.json")
    --auditlog value        File used to emit audit logs. Set to "" to disable (default: "audit.log")
    --rules value           Enable rule-engine (default: "rules.json")
-   --stdio-ui              Use STDIN/STDOUT as a channel for an external UI. This means that an STDIN/STDOUT is used for RPC-communication with a e.g. a graphical user interface, and can be used when the signer is started by an external process.
-   --stdio-ui-test         Mechanism to test interface between signer and UI. Requires 'stdio-ui'.
+   --stdio-ui              Use STDIN/STDOUT as a channel for an external UI. This means that an STDIN/STDOUT is used for RPC-communication with a e.g. a graphical user interface, and can be used when Clef is started by an external process.
+   --stdio-ui-test         Mechanism to test interface between Clef and UI. Requires 'stdio-ui'.
+   --advanced              If enabled, issues warnings instead of rejections for suspicious requests. Default off
    --help, -h              show help
    --version, -v           print the version
-
+   
 ```
 
 
@@ -654,7 +661,7 @@ OBS! A slight deviation from `json` standard is in place: every request and resp
 Whereas the `json` specification allows for linebreaks, linebreaks __should not__ be used in this communication channel, to make
 things simpler for both parties.
 
-### ApproveTx
+### ApproveTx / `ui_approveTx`
 
 Invoked when there's a transaction for approval.
 
@@ -666,13 +673,13 @@ Here's a method invocation:
 
 curl -i -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"account_signTransaction","params":[{"from":"0x694267f14675d7e1b9494fd8d72fefe1755710fa","gas":"0x333","gasPrice":"0x1","nonce":"0x0","to":"0x07a565b7ed7d7a678680a4c162885bedbb695fe0", "value":"0x0", "data":"0x4401a6e40000000000000000000000000000000000000000000000000000000000000012"},"safeSend(address)"],"id":67}' http://localhost:8550/
 ```
-
+Results in the following invocation on the UI:
 ```json
 
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "ApproveTx",
+  "method": "ui_approveTx",
   "params": [
     {
       "transaction": {
@@ -717,7 +724,7 @@ curl -i -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","me
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "ApproveTx",
+  "method": "ui_approveTx",
   "params": [
     {
       "transaction": {
@@ -760,7 +767,7 @@ One which has missing `to`, but with no `data`:
 {
   "jsonrpc": "2.0",
   "id": 3,
-  "method": "ApproveTx",
+  "method": "ui_approveTx",
   "params": [
     {
       "transaction": {
@@ -789,33 +796,7 @@ One which has missing `to`, but with no `data`:
 }
 ```
 
-### ApproveExport
-
-Invoked when a request to export an account has been made.
-
-#### Sample call
-
-```json
-
-{
-  "jsonrpc": "2.0",
-  "id": 7,
-  "method": "ApproveExport",
-  "params": [
-    {
-      "address": "0x0000000000000000000000000000000000000000",
-      "meta": {
-        "remote": "signer binary",
-        "local": "main",
-        "scheme": "in-proc"
-      }
-    }
-  ]
-}
-
-```
-
-### ApproveListing
+### ApproveListing / `ui_approveListing`
 
 Invoked when a request for account listing has been made.
 
@@ -826,7 +807,7 @@ Invoked when a request for account listing has been made.
 {
   "jsonrpc": "2.0",
   "id": 5,
-  "method": "ApproveListing",
+  "method": "ui_approveListing",
   "params": [
     {
       "accounts": [
@@ -853,7 +834,7 @@ Invoked when a request for account listing has been made.
 ```
 
 
-### ApproveSignData
+### ApproveSignData / `ui_approveSignData`
 
 #### Sample call
 
@@ -861,7 +842,7 @@ Invoked when a request for account listing has been made.
 {
   "jsonrpc": "2.0",
   "id": 4,
-  "method": "ApproveSignData",
+  "method": "ui_approveSignData",
   "params": [
     {
       "address": "0x123409812340981234098123409812deadbeef42",
@@ -879,7 +860,7 @@ Invoked when a request for account listing has been made.
 
 ```
 
-### ShowInfo
+### ShowInfo / `ui_showInfo`
 
 The UI should show the info to the user. Does not expect response.
 
@@ -889,7 +870,7 @@ The UI should show the info to the user. Does not expect response.
 {
   "jsonrpc": "2.0",
   "id": 9,
-  "method": "ShowInfo",
+  "method": "ui_showInfo",
   "params": [
     {
       "text": "Tests completed"
@@ -899,7 +880,7 @@ The UI should show the info to the user. Does not expect response.
 
 ```
 
-### ShowError
+### ShowError / `ui_showError`
 
 The UI should show the info to the user. Does not expect response.
 
@@ -918,7 +899,7 @@ The UI should show the info to the user. Does not expect response.
 
 ```
 
-### OnApproved
+### OnApprovedTx / `ui_onApprovedTx`
 
 `OnApprovedTx` is called when a transaction has been approved and signed. The call contains the return value that will be sent to the external caller.  The return value from this method is ignored - the reason for having this callback is to allow the ruleset to keep track of approved transactions.
 
@@ -926,7 +907,7 @@ When implementing rate-limited rules, this callback should be used.
 
 TLDR; Use this method to keep track of signed transactions, instead of using the data in `ApproveTx`.
 
-### OnSignerStartup
+### OnSignerStartup / `ui_onSignerStartup`
 
 This method provide the UI with information about what API version the signer uses (both internal and external) aswell as build-info and external api,
 in k/v-form.
@@ -937,7 +918,7 @@ Example call:
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "OnSignerStartup",
+  "method": "ui_onSignerStartup",
   "params": [
     {
       "info": {
