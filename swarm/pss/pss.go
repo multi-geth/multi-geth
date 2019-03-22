@@ -459,8 +459,6 @@ func (p *Pss) process(pssmsg *PssMsg, raw bool, prox bool) error {
 	return err
 }
 
-}
-
 func (p *Pss) executeHandlers(topic Topic, payload []byte, from PssAddress, raw bool, prox bool, asymmetric bool, keyid string) {
 	handlers := p.getHandlers(topic)
 	peer := p2p.NewPeer(enode.ID{}, fmt.Sprintf("%x", from), []p2p.Cap{})
