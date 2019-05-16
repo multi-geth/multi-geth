@@ -241,6 +241,9 @@ func (c *Config) NodeName() string {
 	if name == "geth" || name == "geth-testnet" {
 		name = "Geth"
 	}
+	if params.VersionName != "" {
+		name = params.VersionName
+	}
 	if c.UserIdent != "" {
 		name += "/" + c.UserIdent
 	}
