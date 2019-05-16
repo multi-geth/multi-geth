@@ -47,10 +47,19 @@ func TestConsoleWelcome(t *testing.T) {
 		"console")
 
 	// Gather all the infos the welcome message needs to contain
+	geth.SetTemplateFunc("clientname", func() string {
+		if params.VersionName != "" {
+			return params.VersionName
+		}
+		if geth.Name() != "" {
+			return geth.Name()
+		}
+		return strings.Title(clientIdentifier)
+	})
 	geth.SetTemplateFunc("goos", func() string { return runtime.GOOS })
 	geth.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
 	geth.SetTemplateFunc("gover", runtime.Version)
-	geth.SetTemplateFunc("gethver", func() string { return params.VersionWithMeta })
+	geth.SetTemplateFunc("gethver", func() string { return params.VersionWithCommit("", "") })
 	geth.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
 	geth.SetTemplateFunc("apis", func() string { return ipcAPIs })
 
@@ -58,7 +67,7 @@ func TestConsoleWelcome(t *testing.T) {
 	geth.Expect(`
 Welcome to the Geth JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: {{clientname}}/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{.Etherbase}}
 at block: 0 ({{niltime}})
  datadir: {{.Datadir}}
@@ -130,10 +139,19 @@ func testAttachWelcome(t *testing.T, geth *testgeth, endpoint, apis string) {
 	attach.CloseStdin()
 
 	// Gather all the infos the welcome message needs to contain
+	attach.SetTemplateFunc("clientname", func() string {
+		if params.VersionName != "" {
+			return params.VersionName
+		}
+		if geth.Name() != "" {
+			return geth.Name()
+		}
+		return strings.Title(clientIdentifier)
+	})
 	attach.SetTemplateFunc("goos", func() string { return runtime.GOOS })
 	attach.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
 	attach.SetTemplateFunc("gover", runtime.Version)
-	attach.SetTemplateFunc("gethver", func() string { return params.VersionWithMeta })
+	attach.SetTemplateFunc("gethver", func() string { return params.VersionWithCommit("", "") })
 	attach.SetTemplateFunc("etherbase", func() string { return geth.Etherbase })
 	attach.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
 	attach.SetTemplateFunc("ipc", func() bool { return strings.HasPrefix(endpoint, "ipc") })
@@ -144,7 +162,7 @@ func testAttachWelcome(t *testing.T, geth *testgeth, endpoint, apis string) {
 	attach.Expect(`
 Welcome to the Geth JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: {{clientname}}/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{etherbase}}
 at block: 0 ({{niltime}}){{if ipc}}
  datadir: {{datadir}}{{end}}
