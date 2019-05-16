@@ -63,9 +63,10 @@ var (
 
 		CreateBySuicide: 25000,
 	}
-	// GasTableEIP158 contain the gas re-prices for
-	// the EIP155/EIP158 phase.
-	GasTableEIP158 = GasTable{
+
+	// GasTableEIP160 contain the gas re-prices for
+	// the EIP160 phase.
+	GasTableEIP160 = GasTable{
 		ExtcodeSize: 700,
 		ExtcodeCopy: 700,
 		Balance:     400,
@@ -76,9 +77,10 @@ var (
 
 		CreateBySuicide: 25000,
 	}
-	// GasTableConstantinople contain the gas re-prices for
+
+	// GasTableEIP1052 contain the gas re-prices for
 	// the constantinople phase.
-	GasTableConstantinople = GasTable{
+	GasTableEIP1052 = GasTable{
 		ExtcodeSize: 700,
 		ExtcodeCopy: 700,
 		ExtcodeHash: 400,
