@@ -26,5 +26,15 @@ export GOPATH
 cd "$ethdir/go-ethereum"
 PWD="$ethdir/go-ethereum"
 
+# Prebuild SVM and set up CGO_LDFLAGS if the build is svm-enabled
+if [ "$SVM" == "true" ]; then
+    # Check that we're not using xgo
+    if [[ "$@" == *"xgo"* ]]; then
+        echo "Cross-builds are not yet supported with EVM-RS enabled"
+        exit 1
+    fi
+    source build/build_evm-rs.sh
+fi
+
 # Launch the arguments with the configured environment.
 exec "$@"
