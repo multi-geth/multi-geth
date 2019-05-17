@@ -31,10 +31,13 @@ import (
 
 const (
 	jsonrpcVersion           = "2.0"
-	serviceMethodSeparator   = "_"
 	subscribeMethodSuffix    = "_subscribe"
 	unsubscribeMethodSuffix  = "_unsubscribe"
 	notificationMethodSuffix = "_subscription"
+)
+
+var (
+	serviceMethodSeparators = []string{"_", "."}
 )
 
 type jsonRequest struct {
@@ -202,7 +205,14 @@ func parseRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) {
 			method: in.Method, params: in.Payload}}, false, nil
 	}
 
-	elems := strings.Split(in.Method, serviceMethodSeparator)
+	var elems []string
+	for i := range serviceMethodSeparators {
+		els := strings.Split(in.Method, serviceMethodSeparators[i])
+		if len(els) == 2 {
+			elems = els
+			break
+		}
+	}
 	if len(elems) != 2 {
 		return nil, false, &methodNotFoundError{in.Method, ""}
 	}
@@ -260,9 +270,15 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 		} else {
 			requests[i] = rpcRequest{id: id, params: r.Payload}
 		}
-		if elem := strings.Split(r.Method, serviceMethodSeparator); len(elem) == 2 {
-			requests[i].service, requests[i].method = elem[0], elem[1]
-		} else {
+
+		for i := range serviceMethodSeparators {
+			els := strings.Split(r.Method, serviceMethodSeparators[i])
+			if len(els) == 2 {
+				requests[i].service, requests[i].method = els[0], els[1]
+				break
+			}
+		}
+		if requests[i].service == "" {
 			requests[i].err = &methodNotFoundError{r.Method, ""}
 		}
 	}
