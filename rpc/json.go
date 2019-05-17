@@ -271,15 +271,13 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 			requests[i] = rpcRequest{id: id, params: r.Payload}
 		}
 
-		for i := range serviceMethodSeparators {
-			els := strings.Split(r.Method, serviceMethodSeparators[i])
+		requests[i].err = &methodNotFoundError{r.Method, ""}
+		for si := range serviceMethodSeparators {
+			els := strings.Split(r.Method, serviceMethodSeparators[si])
 			if len(els) == 2 {
-				requests[i].service, requests[i].method = els[0], els[1]
+				requests[i].service, requests[i].method, requests[i].err = els[0], els[1], nil
 				break
 			}
-		}
-		if requests[i].service == "" {
-			requests[i].err = &methodNotFoundError{r.Method, ""}
 		}
 	}
 
