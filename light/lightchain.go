@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+// Package light implements on-demand retrieval capable state and chain objects
+// for the Ethereum Light Client.
 package light
 
 import (
@@ -99,7 +101,7 @@ func NewLightChain(odr OdrBackend, config *params.ChainConfig, engine consensus.
 	if bc.genesisBlock == nil {
 		return nil, core.ErrNoGenesis
 	}
-	if cp, ok := trustedCheckpoints[bc.genesisBlock.Hash()]; ok {
+	if cp, ok := params.TrustedCheckpoints[bc.genesisBlock.Hash()]; ok {
 		bc.addTrustedCheckpoint(cp)
 	}
 	if err := bc.loadLastState(); err != nil {
@@ -156,7 +158,7 @@ func (lc *LightChain) loadLastState() error {
 	// Issue a status log and return
 	header := lc.hc.CurrentHeader()
 	headerTd := lc.GetTd(header.Hash(), header.Number.Uint64())
-	log.Info("Loaded most recent local header", "number", header.Number, "hash", header.Hash(), "td", headerTd, "age", common.PrettyAge(time.Unix(header.Time.Int64(), 0)))
+	log.Info("Loaded most recent local header", "number", header.Number, "hash", header.Hash(), "td", headerTd, "age", common.PrettyAge(time.Unix(int64(header.Time), 0)))
 
 	return nil
 }
@@ -209,9 +211,8 @@ func (lc *LightChain) Genesis() *types.Block {
 	return lc.genesisBlock
 }
 
-// State returns a new mutable state based on the current HEAD block.
-func (lc *LightChain) State() (*state.StateDB, error) {
-	return nil, errors.New("not implemented, needs client/server interface split")
+func (lc *LightChain) StateCache() state.Database {
+	panic("not implemented")
 }
 
 // GetBody retrieves a block body (transactions and uncles) from the database
@@ -484,7 +485,7 @@ func (lc *LightChain) SyncCht(ctx context.Context) bool {
 
 		// Ensure the chain didn't move past the latest block while retrieving it
 		if lc.hc.CurrentHeader().Number.Uint64() < header.Number.Uint64() {
-			log.Info("Updated latest header based on CHT", "number", header.Number, "hash", header.Hash(), "age", common.PrettyAge(time.Unix(header.Time.Int64(), 0)))
+			log.Info("Updated latest header based on CHT", "number", header.Number, "hash", header.Hash(), "age", common.PrettyAge(time.Unix(int64(header.Time), 0)))
 			lc.hc.SetCurrentHeader(header)
 		}
 		return true

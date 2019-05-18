@@ -5,7 +5,7 @@ matrix:
   include:
     # These are the latest Go versions.
     - os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       go: 1.11.x
       script:
@@ -24,7 +24,7 @@ matrix:
         file_glob: true
         draft: true
         on:
-          repo: ethoxy/multi-geth
+          repo: multi-geth/multi-geth
           tags: true
         skip_cleanup: true
         tag_name: "$TRAVIS_TAG"
@@ -52,14 +52,14 @@ matrix:
         file_glob: true
         draft: true
         on:
-          repo: ethoxy/multi-geth
+          repo: multi-geth/multi-geth
           tags: true
         skip_cleanup: true
         tag_name: "$TRAVIS_TAG"
 
     # This builder only tests code linters on latest version of Go
     - os: linux
-      dist: trusty
+      dist: xenial
       go: 1.11.x
       env:
         - lint

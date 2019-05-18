@@ -134,7 +134,7 @@ type GenesisMismatchError struct {
 }
 
 func (e *GenesisMismatchError) Error() string {
-	return fmt.Sprintf("database already contains an incompatible genesis block (have %x, new %x)", e.Stored[:8], e.New[:8])
+	return fmt.Sprintf("database contains incompatible genesis (have %x, new %x)", e.Stored, e.New)
 }
 
 // SetupGenesisBlock writes or updates the genesis block in db.
@@ -219,8 +219,6 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 		return params.MainnetChainConfig
 	case ghash == params.TestnetGenesisHash:
 		return params.TestnetChainConfig
-	case ghash == params.EllaismGenesisHash:
-		return params.EllaismChainConfig
 	case ghash == params.SocialGenesisHash:
 		return params.SocialChainConfig
 	case ghash == params.MixGenesisHash:
@@ -236,7 +234,7 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 // to the given database (or discards it if nil).
 func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	if db == nil {
-		db = ethdb.NewMemDatabase()
+		db = rawdb.NewMemoryDatabase()
 	}
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(db))
 	for addr, account := range g.Alloc {
@@ -251,7 +249,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	head := &types.Header{
 		Number:     new(big.Int).SetUint64(g.Number),
 		Nonce:      types.EncodeNonce(g.Nonce),
-		Time:       new(big.Int).SetUint64(g.Timestamp),
+		Time:       g.Timestamp,
 		ParentHash: g.ParentHash,
 		Extra:      g.ExtraData,
 		GasLimit:   g.GasLimit,
@@ -320,18 +318,6 @@ func DefaultGenesisBlock() *Genesis {
 		GasLimit:   5000,
 		Difficulty: big.NewInt(17179869184),
 		Alloc:      decodePrealloc(mainnetAllocData),
-	}
-}
-
-// EllaismGenesisBlock returns the Ellaism genesis block.
-func DefaultEllaismGenesisBlock() *Genesis {
-	return &Genesis{
-		Config:     params.EllaismChainConfig,
-		Nonce:      64,
-		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000"),
-		GasLimit:   5000,
-		Difficulty: big.NewInt(1073741824),
-		Alloc:      decodePrealloc(ellaismAllocData),
 	}
 }
 

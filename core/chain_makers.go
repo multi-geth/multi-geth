@@ -104,6 +104,15 @@ func (b *BlockGen) AddTxWithChain(bc *BlockChain, tx *types.Transaction) {
 	b.receipts = append(b.receipts, receipt)
 }
 
+// AddUncheckedTx forcefully adds a transaction to the block without any
+// validation.
+//
+// AddUncheckedTx will cause consensus failures when used during real
+// chain processing. This is best used in conjunction with raw block insertion.
+func (b *BlockGen) AddUncheckedTx(tx *types.Transaction) {
+	b.txs = append(b.txs, tx)
+}
+
 // Number returns the block number of the block being generated.
 func (b *BlockGen) Number() *big.Int {
 	return new(big.Int).Set(b.header.Number)
@@ -149,12 +158,12 @@ func (b *BlockGen) PrevBlock(index int) *types.Block {
 // associated difficulty. It's useful to test scenarios where forking is not
 // tied to chain length directly.
 func (b *BlockGen) OffsetTime(seconds int64) {
-	b.header.Time.Add(b.header.Time, big.NewInt(seconds))
-	if b.header.Time.Cmp(b.parent.Header().Time) <= 0 {
+	b.header.Time += uint64(seconds)
+	if b.header.Time <= b.parent.Header().Time {
 		panic("block time out of range")
 	}
 	chainreader := &fakeChainReader{config: b.config}
-	b.header.Difficulty = b.engine.CalcDifficulty(chainreader, b.header.Time.Uint64(), b.parent.Header())
+	b.header.Difficulty = b.engine.CalcDifficulty(chainreader, b.header.Time, b.parent.Header())
 }
 
 // GenerateChain creates a chain of n blocks. The first block's
@@ -225,20 +234,20 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 }
 
 func makeHeader(chain consensus.ChainReader, parent *types.Block, state *state.StateDB, engine consensus.Engine) *types.Header {
-	var time *big.Int
-	if parent.Time() == nil {
-		time = big.NewInt(10)
+	var time uint64
+	if parent.Time() == 0 {
+		time = 10
 	} else {
-		time = new(big.Int).Add(parent.Time(), big.NewInt(10)) // block time is fixed at 10 seconds
+		time = parent.Time() + 10 // block time is fixed at 10 seconds
 	}
 
 	return &types.Header{
 		Root:       state.IntermediateRoot(chain.Config().IsEIP161F(parent.Number())),
 		ParentHash: parent.Hash(),
 		Coinbase:   parent.Coinbase(),
-		Difficulty: engine.CalcDifficulty(chain, time.Uint64(), &types.Header{
+		Difficulty: engine.CalcDifficulty(chain, time, &types.Header{
 			Number:     parent.Number(),
-			Time:       new(big.Int).Sub(time, big.NewInt(10)),
+			Time:       time - 10,
 			Difficulty: parent.Difficulty(),
 			UncleHash:  parent.UncleHash(),
 		}),

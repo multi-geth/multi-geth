@@ -28,9 +28,11 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/accounts/scwallet"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/consensus/clique"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
@@ -43,7 +45,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/syndtr/goleveldb/leveldb/util"
+	"github.com/tyler-smith/go-bip39"
 )
 
 const (
@@ -317,7 +319,14 @@ func (s *PrivateAccountAPI) ImportRawKey(privkey string, password string) (commo
 // UnlockAccount will unlock the account associated with the given address with
 // the given password for duration seconds. If duration is nil it will use a
 // default of 300 seconds. It returns an indication if the account was unlocked.
-func (s *PrivateAccountAPI) UnlockAccount(addr common.Address, password string, duration *uint64) (bool, error) {
+func (s *PrivateAccountAPI) UnlockAccount(ctx context.Context, addr common.Address, password string, duration *uint64) (bool, error) {
+	// When the API is exposed by external RPC(http, ws etc), unless the user
+	// explicitly specifies to allow the insecure account unlocking, otherwise
+	// it is disabled.
+	if s.b.ExtRPCEnabled() && !s.b.AccountManager().Config().InsecureUnlockAllowed {
+		return false, errors.New("account unlock with HTTP access is forbidden")
+	}
+
 	const max = uint64(time.Duration(math.MaxInt64) / time.Second)
 	var d time.Duration
 	if duration == nil {
@@ -462,6 +471,48 @@ func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Byt
 // and will be removed in the future. It primary goal is to give clients time to update.
 func (s *PrivateAccountAPI) SignAndSendTransaction(ctx context.Context, args SendTxArgs, passwd string) (common.Hash, error) {
 	return s.SendTransaction(ctx, args, passwd)
+}
+
+// InitializeWallet initializes a new wallet at the provided URL, by generating and returning a new private key.
+func (s *PrivateAccountAPI) InitializeWallet(ctx context.Context, url string) (string, error) {
+	wallet, err := s.am.Wallet(url)
+	if err != nil {
+		return "", err
+	}
+
+	entropy, err := bip39.NewEntropy(256)
+	if err != nil {
+		return "", err
+	}
+
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return "", err
+	}
+
+	seed := bip39.NewSeed(mnemonic, "")
+
+	switch wallet := wallet.(type) {
+	case *scwallet.Wallet:
+		return mnemonic, wallet.Initialize(seed)
+	default:
+		return "", fmt.Errorf("Specified wallet does not support initialization")
+	}
+}
+
+// Unpair deletes a pairing between wallet and geth.
+func (s *PrivateAccountAPI) Unpair(ctx context.Context, url string, pin string) error {
+	wallet, err := s.am.Wallet(url)
+	if err != nil {
+		return err
+	}
+
+	switch wallet := wallet.(type) {
+	case *scwallet.Wallet:
+		return wallet.Unpair([]byte(pin))
+	default:
+		return fmt.Errorf("Specified wallet does not support pairing")
+	}
 }
 
 // PublicBlockChainAPI provides an API to access the Ethereum blockchain.
@@ -667,7 +718,7 @@ type CallArgs struct {
 	Data     *hexutil.Bytes  `json:"data"`
 }
 
-func DoCall(ctx context.Context, b Backend, args CallArgs, blockNr rpc.BlockNumber, vmCfg vm.Config, timeout time.Duration) ([]byte, uint64, bool, error) {
+func DoCall(ctx context.Context, b Backend, args CallArgs, blockNr rpc.BlockNumber, vmCfg vm.Config, timeout time.Duration, globalGasCap *big.Int) ([]byte, uint64, bool, error) {
 	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
 
 	state, header, err := b.StateAndHeaderByNumber(ctx, blockNr)
@@ -689,6 +740,10 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNr rpc.BlockNumb
 	gas := uint64(math.MaxUint64 / 2)
 	if args.Gas != nil {
 		gas = uint64(*args.Gas)
+	}
+	if globalGasCap != nil && globalGasCap.Uint64() < gas {
+		log.Warn("Caller gas above allowance, capping", "requested", gas, "cap", globalGasCap)
+		gas = globalGasCap.Uint64()
 	}
 	gasPrice := new(big.Int).SetUint64(defaultGasPrice)
 	if args.GasPrice != nil {
@@ -745,11 +800,11 @@ func DoCall(ctx context.Context, b Backend, args CallArgs, blockNr rpc.BlockNumb
 // Call executes the given transaction on the state for the given block number.
 // It doesn't make and changes in the state/blockchain and is useful to execute and retrieve values.
 func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNr rpc.BlockNumber) (hexutil.Bytes, error) {
-	result, _, _, err := DoCall(ctx, s.b, args, blockNr, vm.Config{}, 5*time.Second)
+	result, _, _, err := DoCall(ctx, s.b, args, blockNr, vm.Config{}, 5*time.Second, s.b.RPCGasCap())
 	return (hexutil.Bytes)(result), err
 }
 
-func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNr rpc.BlockNumber) (hexutil.Uint64, error) {
+func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNr rpc.BlockNumber, gasCap *big.Int) (hexutil.Uint64, error) {
 	// Binary search the gas requirement, as it may be higher than the amount used
 	var (
 		lo  uint64 = params.TxGas - 1
@@ -766,13 +821,17 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNr rpc.Bl
 		}
 		hi = block.GasLimit()
 	}
+	if gasCap != nil && hi > gasCap.Uint64() {
+		log.Warn("Caller gas above allowance, capping", "requested", hi, "cap", gasCap)
+		hi = gasCap.Uint64()
+	}
 	cap = hi
 
 	// Create a helper to check if a gas allowance results in an executable transaction
 	executable := func(gas uint64) bool {
 		args.Gas = (*hexutil.Uint64)(&gas)
 
-		_, _, failed, err := DoCall(ctx, b, args, rpc.PendingBlockNumber, vm.Config{}, 0)
+		_, _, failed, err := DoCall(ctx, b, args, rpc.PendingBlockNumber, vm.Config{}, 0, gasCap)
 		if err != nil || failed {
 			return false
 		}
@@ -790,7 +849,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNr rpc.Bl
 	// Reject the transaction as invalid if it still fails at the highest allowance
 	if hi == cap {
 		if !executable(hi) {
-			return 0, fmt.Errorf("gas required exceeds allowance or always failing transaction")
+			return 0, fmt.Errorf("gas required exceeds allowance (%d) or always failing transaction", cap)
 		}
 	}
 	return hexutil.Uint64(hi), nil
@@ -799,7 +858,7 @@ func DoEstimateGas(ctx context.Context, b Backend, args CallArgs, blockNr rpc.Bl
 // EstimateGas returns an estimate of the amount of gas needed to execute the
 // given transaction against the current pending block.
 func (s *PublicBlockChainAPI) EstimateGas(ctx context.Context, args CallArgs) (hexutil.Uint64, error) {
-	return DoEstimateGas(ctx, s.b, args, rpc.PendingBlockNumber)
+	return DoEstimateGas(ctx, s.b, args, rpc.PendingBlockNumber, s.b.RPCGasCap())
 }
 
 // ExecutionResult groups all structured logs emitted by the EVM
@@ -883,7 +942,7 @@ func RPCMarshalBlock(b *types.Block, inclTx bool, fullTx bool) (map[string]inter
 		"size":             hexutil.Uint64(b.Size()),
 		"gasLimit":         hexutil.Uint64(head.GasLimit),
 		"gasUsed":          hexutil.Uint64(head.GasUsed),
-		"timestamp":        (*hexutil.Big)(head.Time),
+		"timestamp":        hexutil.Uint64(head.Time),
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
 	}
@@ -1469,6 +1528,45 @@ func (api *PublicDebugAPI) GetBlockRlp(ctx context.Context, number uint64) (stri
 	return fmt.Sprintf("%x", encoded), nil
 }
 
+// TestSignCliqueBlock fetches the given block number, and attempts to sign it as a clique header with the
+// given address, returning the address of the recovered signature
+//
+// This is a temporary method to debug the externalsigner integration,
+// TODO: Remove this method when the integration is mature
+func (api *PublicDebugAPI) TestSignCliqueBlock(ctx context.Context, address common.Address, number uint64) (common.Address, error) {
+	block, _ := api.b.BlockByNumber(ctx, rpc.BlockNumber(number))
+	if block == nil {
+		return common.Address{}, fmt.Errorf("block #%d not found", number)
+	}
+	header := block.Header()
+	header.Extra = make([]byte, 32+65)
+	encoded := clique.CliqueRLP(header)
+
+	// Look up the wallet containing the requested signer
+	account := accounts.Account{Address: address}
+	wallet, err := api.b.AccountManager().Find(account)
+	if err != nil {
+		return common.Address{}, err
+	}
+
+	signature, err := wallet.SignData(account, accounts.MimetypeClique, encoded)
+	if err != nil {
+		return common.Address{}, err
+	}
+	sealHash := clique.SealHash(header).Bytes()
+	log.Info("test signing of clique block",
+		"Sealhash", fmt.Sprintf("%x", sealHash),
+		"signature", fmt.Sprintf("%x", signature))
+	pubkey, err := crypto.Ecrecover(sealHash, signature)
+	if err != nil {
+		return common.Address{}, err
+	}
+	var signer common.Address
+	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
+
+	return signer, nil
+}
+
 // PrintBlock retrieves a block and returns its pretty printed form.
 func (api *PublicDebugAPI) PrintBlock(ctx context.Context, number uint64) (string, error) {
 	block, _ := api.b.BlockByNumber(ctx, rpc.BlockNumber(number))
@@ -1516,16 +1614,9 @@ func (api *PrivateDebugAPI) ChaindbProperty(property string) (string, error) {
 }
 
 func (api *PrivateDebugAPI) ChaindbCompact() error {
-	ldb, ok := api.b.ChainDb().(interface {
-		LDB() *leveldb.DB
-	})
-	if !ok {
-		return fmt.Errorf("chaindbCompact does not work for memory databases")
-	}
 	for b := byte(0); b < 255; b++ {
 		log.Info("Compacting chain database", "range", fmt.Sprintf("0x%0.2X-0x%0.2X", b, b+1))
-		err := ldb.LDB().CompactRange(util.Range{Start: []byte{b}, Limit: []byte{b + 1}})
-		if err != nil {
+		if err := api.b.ChainDb().Compact([]byte{b}, []byte{b + 1}); err != nil {
 			log.Error("Database compaction failed", "err", err)
 			return err
 		}
