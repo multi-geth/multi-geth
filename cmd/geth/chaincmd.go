@@ -35,8 +35,6 @@ import (
 	"github.com/ethereum/go-ethereum/eth/downloader"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/syndtr/goleveldb/leveldb/util"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
