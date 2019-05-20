@@ -33,7 +33,7 @@ if [ "$SVM" = "true" ]; then
         echo "Cross-builds are not yet supported with EVM-RS enabled"
         exit 1
     fi
-    source build/build_evm-rs.sh
+    . build/build_evm-rs.sh
 fi
 
 # Launch the arguments with the configured environment.
