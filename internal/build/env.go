@@ -43,7 +43,7 @@ type Environment struct {
 	Buildnum                  string
 	IsPullRequest             bool
 	IsCronJob                 bool
-	WithSVM             bool
+	WithSVM                   bool
 }
 
 func (env Environment) String() string {
