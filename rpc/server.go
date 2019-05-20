@@ -18,6 +18,8 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -42,20 +44,60 @@ const (
 	OptionSubscriptions = 1 << iota // support pub sub
 )
 
+var (
+	// defaultOpenRPCSchemaRaw can be used to establish a default (package-wide) OpenRPC schema from raw JSON.
+	// Methods will be cross referenced with actual registered method names in order to serve
+	// only server-enabled methods, enabling user and on-the-fly server endpoint availability configuration.
+	defaultOpenRPCSchemaRaw string
+
+	errOpenRPCDiscoverUnavailable   = errors.New("openrpc discover data unavailable")
+	errOpenRPCDiscoverSchemaInvalid = errors.New("openrpc discover data invalid")
+)
+
 // NewServer will create a new server instance with no registered handlers.
 func NewServer() *Server {
 	server := &Server{
-		services: make(serviceRegistry),
-		codecs:   mapset.NewSet(),
-		run:      1,
+		services:         make(serviceRegistry),
+		codecs:           mapset.NewSet(),
+		run:              1,
+		OpenRPCSchemaRaw: defaultOpenRPCSchemaRaw,
 	}
 
 	// register a default service which will provide meta information about the RPC service such as the services and
 	// methods it offers.
-	rpcService := &RPCService{server}
+	rpcService := &RPCService{server: server}
 	server.RegisterName(MetadataApi, rpcService)
 
 	return server
+}
+
+func validateOpenRPCSchemaRaw(schemaJSON string) error {
+	if schemaJSON == "" {
+		return errOpenRPCDiscoverSchemaInvalid
+	}
+	var schema OpenRPCDiscoverSchemaT
+	if err := json.Unmarshal([]byte(schemaJSON), &schema); err != nil {
+		return fmt.Errorf("%v: %v", errOpenRPCDiscoverSchemaInvalid, err)
+	}
+	return nil
+}
+
+// SetDefaultOpenRPCSchemaRaw validates and sets the package-wide OpenRPC schema data.
+func SetDefaultOpenRPCSchemaRaw(schemaJSON string) error {
+	if err := validateOpenRPCSchemaRaw(schemaJSON); err != nil {
+		return err
+	}
+	defaultOpenRPCSchemaRaw = schemaJSON
+	return nil
+}
+
+// SetOpenRPCSchemaRaw validates and sets the raw OpenRPC schema data for a server.
+func (s *Server) SetOpenRPCSchemaRaw(schemaJSON string) error {
+	if err := validateOpenRPCSchemaRaw(schemaJSON); err != nil {
+		return err
+	}
+	s.OpenRPCSchemaRaw = schemaJSON
+	return nil
 }
 
 // RPCService gives meta information about the server.
@@ -71,6 +113,72 @@ func (s *RPCService) Modules() map[string]string {
 		modules[name] = "1.0"
 	}
 	return modules
+}
+
+func (s *RPCService) methods() map[string][]string {
+	methods := make(map[string][]string)
+	for name, ser := range s.server.services {
+		for s := range ser.callbacks {
+			_, ok := methods[name]
+			if !ok {
+				methods[name] = []string{s}
+			} else {
+				methods[name] = append(methods[name], s)
+			}
+		}
+	}
+	return methods
+}
+
+// Discover returns a configured schema that is audited for actual server availability.
+// Only methods that the server makes available are included in the 'methods' array of
+// the discover schema. Components are not audited.
+func (s *RPCService) Discover() (schema *OpenRPCDiscoverSchemaT, err error) {
+	if s.server.OpenRPCSchemaRaw == "" {
+		return nil, errOpenRPCDiscoverUnavailable
+	}
+	schema = &OpenRPCDiscoverSchemaT{}
+	err = json.Unmarshal([]byte(s.server.OpenRPCSchemaRaw), schema)
+	if err != nil {
+		log.Crit("openrpc json umarshal", "error", err)
+	}
+
+	// Audit documented schema methods vs. actual server availability
+	// This removes methods described in the OpenRPC JSON schema document
+	// which are not currently exposed on the server's API.
+	// This is done on the fly (as opposed to at servre init or schema setting)
+	// because it's possible that exposed APIs could be modified in proc.
+	schemaMethodsAvailable := []map[string]interface{}{}
+	serverMethodsAvailable := s.methods()
+
+	for _, m := range schema.Methods {
+		var elems []string
+		for i := range serviceMethodSeparators {
+			els := strings.Split(m["name"].(string), serviceMethodSeparators[i])
+			if len(els) == 2 {
+				elems = els
+				break
+			}
+		}
+		if len(elems) != 2 {
+			return nil, errOpenRPCDiscoverSchemaInvalid
+		}
+		module, path := elems[0], elems[1]
+		paths, ok := serverMethodsAvailable[module]
+		if !ok {
+			continue
+		}
+
+		// the module exists, does the path exist?
+		for _, pa := range paths {
+			if pa == path {
+				schemaMethodsAvailable = append(schemaMethodsAvailable, m)
+				break
+			}
+		}
+	}
+	schema.Methods = schemaMethodsAvailable
+	return
 }
 
 // RegisterName will create a service for the given rcvr type under the given name. When no methods on the given rcvr
@@ -292,7 +400,7 @@ func (s *Server) handle(ctx context.Context, codec ServerCodec, req *serverReque
 	// regular RPC call, prepare arguments
 	if len(req.args) != len(req.callb.argTypes) {
 		rpcErr := &invalidParamsError{fmt.Sprintf("%s%s%s expects %d parameters, got %d",
-			req.svcname, serviceMethodSeparator, req.callb.method.Name,
+			req.svcname, serviceMethodSeparators[0], req.callb.method.Name,
 			len(req.callb.argTypes), len(req.args))}
 		return codec.CreateErrorResponse(&req.id, rpcErr), nil
 	}

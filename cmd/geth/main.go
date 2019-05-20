@@ -35,9 +35,11 @@ import (
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/internal/debug"
+	"github.com/ethereum/go-ethereum/internal/openrpc"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/node"
+	"github.com/ethereum/go-ethereum/rpc"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -120,7 +122,12 @@ var (
 		utils.DeveloperFlag,
 		utils.DeveloperPeriodFlag,
 		utils.TestnetFlag,
+		utils.ClassicFlag,
+		utils.SocialFlag,
+		utils.MixFlag,
+		utils.EthersocialFlag,
 		utils.RinkebyFlag,
+		utils.KottiFlag,
 		utils.GoerliFlag,
 		utils.VMEnableDebugFlag,
 		utils.NetworkIdFlag,
@@ -249,6 +256,10 @@ func init() {
 		debug.Exit()
 		console.Stdin.Close() // Resets terminal mode.
 		return nil
+	}
+
+	if err := rpc.SetDefaultOpenRPCSchemaRaw(openrpc.OpenRPCSchema); err != nil {
+		log.Crit("Setting OpenRPC default", "error", err)
 	}
 }
 

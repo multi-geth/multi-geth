@@ -34,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -240,6 +241,9 @@ func (c *Config) NodeName() string {
 	// Backwards compatibility: previous versions used title-cased "Geth", keep that.
 	if name == "geth" || name == "geth-testnet" {
 		name = "Geth"
+	}
+	if params.VersionName != "" {
+		name = params.VersionName
 	}
 	if c.UserIdent != "" {
 		name += "/" + c.UserIdent

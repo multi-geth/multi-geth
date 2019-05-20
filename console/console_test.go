@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/internal/jsre"
 	"github.com/ethereum/go-ethereum/node"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 const (
@@ -168,7 +169,11 @@ func TestWelcome(t *testing.T) {
 	if want := "Welcome"; !strings.Contains(output, want) {
 		t.Fatalf("console output missing welcome message: have\n%s\nwant also %s", output, want)
 	}
-	if want := fmt.Sprintf("instance: %s", testInstance); !strings.Contains(output, want) {
+	wantInstanceName := testInstance
+	if params.VersionName != "" {
+		wantInstanceName = params.VersionName
+	}
+	if want := fmt.Sprintf("instance: %s", wantInstanceName); !strings.Contains(output, want) {
 		t.Fatalf("console output missing instance: have\n%s\nwant also %s", output, want)
 	}
 	if want := fmt.Sprintf("coinbase: %s", testAddress); !strings.Contains(output, want) {

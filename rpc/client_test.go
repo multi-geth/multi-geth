@@ -94,7 +94,16 @@ func TestClientBatchRequest(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(batch, wantResult) {
-		t.Errorf("batch results mismatch:\ngot %swant %s", spew.Sdump(batch), spew.Sdump(wantResult))
+		didDoError := false // make double sure that we're erroring
+		for i, ba := range batch {
+			if !reflect.DeepEqual(ba, wantResult[i]) {
+				t.Errorf("%d batch results mismatch:\ngot: %s\nwant: %s", i, spew.Sdump(ba), spew.Sdump(wantResult[i]))
+				didDoError = true
+			}
+		}
+		if !didDoError {
+			t.Errorf("batch results mismatch:\ngot %swant %s", spew.Sdump(batch), spew.Sdump(wantResult))
+		}
 	}
 }
 
