@@ -13,6 +13,8 @@ import (
 	"math/big"
 )
 
+const IsSputnikvmEnabled bool = true
+
 func precheckSputnikVMTransaction(config *params.ChainConfig, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64) error {
 	// Convert transaction to message
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))

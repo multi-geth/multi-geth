@@ -12,6 +12,8 @@ import (
 
 type FeatureDisabledError struct{}
 
+const IsSputnikvmEnabled bool = false
+
 func (e *FeatureDisabledError) Error() string {
 	return "'sputnikvm' feature is disabled, please rebuild 'geth' with 'sputnikvm' tag, or use a built-in evm"
 }
