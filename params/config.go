@@ -590,7 +590,13 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
+
+	DifficultyBombDelays DifficultyBombDelaysT `json:"difficultyBombDelays"`
+	BlockRewardSchedule  BlockRewardScheduleT  `json:"blockReward"`
 }
+
+type DifficultyBombDelaysT map[*big.Int]*big.Int
+type BlockRewardScheduleT map[*big.Int]*big.Int
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
 type EthashConfig struct{}

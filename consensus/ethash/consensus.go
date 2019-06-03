@@ -378,6 +378,26 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 	if config.IsBombDisposal(next) {
 		return out
 
+	} else if config.DifficultyBombDelays != nil {
+
+		// Find the latest applicable delay.
+		greatestRelevantActivation := new(big.Int)
+		activatedDuration := new(big.Int)
+		for activated, dur := range config.DifficultyBombDelays {
+			if exPeriodRef.Cmp(activated) < 0 {
+				continue
+			}
+			if greatestRelevantActivation == nil {
+				greatestRelevantActivation.Set(activated)
+			}
+			if activated.Cmp(greatestRelevantActivation) >= 0 {
+				greatestRelevantActivation.Set(activated)
+				activatedDuration.Set(dur)
+			}
+		}
+
+		exPeriodRef.Sub(exPeriodRef, activatedDuration)
+
 	} else if config.IsEIP1234F(next) {
 		// calcDifficultyEIP1234 is the difficulty adjustment algorithm for Constantinople.
 		// The calculation uses the Byzantium rules, but with bomb offset 5M.
