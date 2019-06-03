@@ -17,10 +17,12 @@
 package params
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // Genesis hashes to enforce below configs on.
@@ -221,8 +223,15 @@ var (
 
 		new(EthashConfig), // Ethash
 		nil,               // Clique
-		DifficultyBombDelaysT{},
-		BlockRewardScheduleT{},
+		DifficultyBombDelaysT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
+		BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x4563918244f40000)),
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
 	}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
@@ -342,9 +351,15 @@ var (
 
 		new(EthashConfig), // Ethash
 		nil,               // Clique
-
-		DifficultyBombDelaysT{},
-		BlockRewardScheduleT{},
+		DifficultyBombDelaysT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
+		BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x4563918244f40000)),
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
 	}
 
 	// TestRules are all rules from TestChainConfig initialized at 0.
@@ -482,12 +497,72 @@ type ChainConfig struct {
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
 
-	DifficultyBombDelays DifficultyBombDelaysT `json:"difficultyBombDelays"`
-	BlockRewardSchedule  BlockRewardScheduleT  `json:"blockReward"`
+	DifficultyBombDelays DifficultyBombDelaysT `json:"difficultyBombDelays,omitempty"`
+	BlockRewardSchedule  BlockRewardScheduleT  `json:"blockReward,omitempty"`
 }
 
 type DifficultyBombDelaysT map[*big.Int]*big.Int
+
+func (dbd *DifficultyBombDelaysT) UnmarshalJSON(input []byte) error {
+	var n = make(map[string]string)
+	if err := json.Unmarshal(input, &n); err != nil {
+		return err
+	}
+	d := DifficultyBombDelaysT{}
+	for k, v := range n {
+		kk, err := hexutil.DecodeBig(k)
+		if err != nil {
+			return err
+		}
+		vv, err := hexutil.DecodeBig(v)
+		if err != nil {
+			return err
+		}
+		d[kk] = vv
+	}
+	*dbd = d
+	return nil
+}
+func (dbd DifficultyBombDelaysT) MarshalJSON() ([]byte, error) {
+	var m = make(map[string]string)
+	for k, v := range dbd {
+		kk, vv := hexutil.EncodeBig(k), hexutil.EncodeBig(v)
+		m[kk] = vv
+	}
+	return json.Marshal(m)
+}
+
 type BlockRewardScheduleT map[*big.Int]*big.Int
+
+func (brs *BlockRewardScheduleT) UnmarshalJSON(input []byte) error {
+	var n = make(map[string]string)
+	if err := json.Unmarshal(input, &n); err != nil {
+		return err
+	}
+	d := BlockRewardScheduleT{}
+	for k, v := range n {
+		kk, err := hexutil.DecodeBig(k)
+		if err != nil {
+			return err
+		}
+		vv, err := hexutil.DecodeBig(v)
+		if err != nil {
+			return err
+		}
+		d[kk] = vv
+	}
+	*brs = d
+	return nil
+}
+
+func (brs BlockRewardScheduleT) MarshalJSON() ([]byte, error) {
+	var m = make(map[string]string)
+	for k, v := range brs {
+		kk, vv := hexutil.EncodeBig(k), hexutil.EncodeBig(v)
+		m[kk] = vv
+	}
+	return json.Marshal(m)
+}
 
 var FrontierBlockReward = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
 var EIP649FBlockReward = big.NewInt(3e+18)  // Block reward in wei for successfully mining a block upward from Byzantium
@@ -498,7 +573,7 @@ func (c *ChainConfig) EthashBlockReward(n *big.Int) *big.Int {
 	// }
 	// Select the correct block reward based on chain progression
 	blockReward := FrontierBlockReward
-	if n == nil {
+	if c == nil || n == nil {
 		return blockReward
 	}
 	if c.IsEIP649F(n) {

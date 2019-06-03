@@ -367,7 +367,7 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 
 		// Find the latest applicable delay.
 		greatestRelevantActivation := new(big.Int)
-		activatedDuration := new(big.Int)
+		activatedDuration := big.NewInt(0)
 		for activated, dur := range config.DifficultyBombDelays {
 			if exPeriodRef.Cmp(activated) < 0 {
 				continue
@@ -375,10 +375,7 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 			if greatestRelevantActivation == nil {
 				greatestRelevantActivation.Set(activated)
 			}
-			if activated.Cmp(greatestRelevantActivation) >= 0 {
-				greatestRelevantActivation.Set(activated)
-				activatedDuration.Set(dur)
-			}
+			activatedDuration.Add(activatedDuration, dur)
 		}
 
 		exPeriodRef.Sub(exPeriodRef, activatedDuration)

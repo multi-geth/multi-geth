@@ -17,12 +17,26 @@
 package params
 
 import (
+	"encoding/json"
 	"math/big"
 	"reflect"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 )
+
+func TestMarshalingJSON(t *testing.T) {
+	c := TestChainConfig
+	b, err := json.MarshalIndent(c, "", "    ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c2 := ChainConfig{}
+	err = json.Unmarshal(b, &c2)
+	if err != nil {
+		t.Fatal(err, string(b))
+	}
+}
 
 func TestCheckCompatible(t *testing.T) {
 	type test struct {

@@ -84,3 +84,65 @@ func TestCalcDifficulty(t *testing.T) {
 		}
 	}
 }
+
+func TestCalcDifficultyDifficultyDelayConfigVSForkFeatureConfig(t *testing.T) {
+	file, err := os.Open(filepath.Join("..", "..", "tests", "testdata", "BasicTests", "difficulty.json"))
+	if err != nil {
+		t.Skip(err)
+	}
+	defer file.Close()
+
+	tests := make(map[string]diffTest)
+	err = json.NewDecoder(file).Decode(&tests)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mainA := &params.ChainConfig{}
+	mainB := &params.ChainConfig{}
+
+	*mainA = *params.MainnetChainConfig
+	*mainB = *params.MainnetChainConfig
+
+	testN := big.NewInt(10000000)
+	mainA.DifficultyBombDelays = nil
+	if !mainA.IsEIP1234F(testN) || !mainA.IsEIP649F(testN) {
+		t.Fatal("test requires reference config to use fork features to compare to difficulty delay map")
+	}
+
+	for name, test := range tests {
+		number := new(big.Int).Sub(test.CurrentBlocknumber, big.NewInt(1))
+		diffA := CalcDifficulty(mainA, test.CurrentTimestamp, &types.Header{
+			Number:     number,
+			Time:       test.ParentTimestamp,
+			Difficulty: test.ParentDifficulty,
+		})
+		diffB := CalcDifficulty(mainB, test.CurrentTimestamp, &types.Header{
+			Number:     number,
+			Time:       test.ParentTimestamp,
+			Difficulty: test.ParentDifficulty,
+		})
+
+		if diffA.Cmp(diffB) != 0 {
+			t.Errorf("%s: want: %v, got: %v", name, diffA, diffB)
+		}
+	}
+
+	for name, test := range tests {
+		diffA := CalcDifficulty(mainA, test.CurrentTimestamp, &types.Header{
+			Number:     testN,
+			Time:       test.ParentTimestamp,
+			Difficulty: test.ParentDifficulty,
+		})
+		diffB := CalcDifficulty(mainB, test.CurrentTimestamp, &types.Header{
+			Number:     testN,
+			Time:       test.ParentTimestamp,
+			Difficulty: test.ParentDifficulty,
+		})
+
+		if diffA.Cmp(diffB) != 0 {
+			t.Errorf("%s: want: %v, got: %v", name, diffA, diffB)
+		}
+	}
+
+}
