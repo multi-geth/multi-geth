@@ -38,11 +38,8 @@ import (
 
 // Ethash proof-of-work protocol constants.
 var (
-	FrontierBlockReward    = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
-	EIP649FBlockReward     = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
-	EIP1234FBlockReward    = big.NewInt(2e+18) // Block reward in wei for successfully mining a block upward from Constantinople
-	maxUncles              = 2                 // Maximum number of uncles allowed in a single block
-	allowedFutureBlockTime = 15 * time.Second  // Max time from current time allowed for blocks, before they're considered future blocks
+	maxUncles              = 2                // Maximum number of uncles allowed in a single block
+	allowedFutureBlockTime = 15 * time.Second // Max time from current time allowed for blocks, before they're considered future blocks
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -366,7 +363,7 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 	if config.IsBombDisposal(next) {
 		return out
 
-	} else if config.DifficultyBombDelays != nil {
+	} else if len(config.DifficultyBombDelays) > 0 {
 
 		// Find the latest applicable delay.
 		greatestRelevantActivation := new(big.Int)
@@ -581,42 +578,30 @@ var (
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	// Select the correct block reward based on chain progression
-	blockReward := FrontierBlockReward
-	if config.IsEIP649F(header.Number) {
-		blockReward = EIP649FBlockReward
-	}
-	if config.IsEIP1234F(header.Number) {
-		blockReward = EIP1234FBlockReward
-	}
-	if config.IsSocial(header.Number) {
-		blockReward = params.SocialBlockReward
-	}
-	if config.IsEthersocial(header.Number) {
-		blockReward = params.EthersocialBlockReward
-	}
 	if config.IsMCIP0(header.Number) {
 		musicoinBlockReward(config, state, header, uncles)
 		return
 	}
 	if config.HasECIP1017() {
 		ecip1017BlockReward(config, state, header, uncles)
-	} else {
-		// Accumulate the rewards for the miner and any included uncles
-		reward := new(big.Int).Set(blockReward)
-		r := new(big.Int)
-		for _, uncle := range uncles {
-			r.Add(uncle.Number, big8)
-			r.Sub(r, header.Number)
-			r.Mul(r, blockReward)
-			r.Div(r, big8)
-			state.AddBalance(uncle.Coinbase, r)
-
-			r.Div(blockReward, big32)
-			reward.Add(reward, r)
-		}
-		state.AddBalance(header.Coinbase, reward)
+		return
 	}
+
+	blockReward := config.EthashBlockReward(header.Number)
+	// Accumulate the rewards for the miner and any included uncles
+	reward := new(big.Int).Set(blockReward)
+	r := new(big.Int)
+	for _, uncle := range uncles {
+		r.Add(uncle.Number, big8)
+		r.Sub(r, header.Number)
+		r.Mul(r, blockReward)
+		r.Div(r, big8)
+		state.AddBalance(uncle.Coinbase, r)
+
+		r.Div(blockReward, big32)
+		reward.Add(reward, r)
+	}
+	state.AddBalance(header.Coinbase, reward)
 }
 
 // As of "Era 2" (zero-index era 1), uncle miners and winners are rewarded equally for each included block.
