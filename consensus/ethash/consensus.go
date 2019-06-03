@@ -366,18 +366,17 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 	} else if len(config.DifficultyBombDelays) > 0 {
 
 		// This logic varies from the original fork-based logic (below) in that
-		// configured delay values are treated as compounding values (2000000 + 3000000 = 5000000@constantinople)
-		// as opposed to hardcoded pre-compounded values (5000000@constantinople).
-		// Thus the Add-ing.
-		activatedDuration := big.NewInt(0)
+		// configured delay values are treated as compounding values (-2000000 + -3000000 = -5000000@constantinople)
+		// as opposed to hardcoded pre-compounded values (-5000000@constantinople).
+		// Thus the Sub-ing.
+		fakeBlockNumber := new(big.Int).Set(exPeriodRef)
 		for activated, dur := range config.DifficultyBombDelays {
 			if exPeriodRef.Cmp(activated) < 0 {
 				continue
 			}
-			activatedDuration.Add(activatedDuration, dur)
+			fakeBlockNumber.Sub(fakeBlockNumber, dur)
 		}
-
-		exPeriodRef.Sub(exPeriodRef, activatedDuration)
+		exPeriodRef.Set(fakeBlockNumber)
 
 	} else if config.IsEIP1234F(next) {
 		// calcDifficultyEIP1234 is the difficulty adjustment algorithm for Constantinople.

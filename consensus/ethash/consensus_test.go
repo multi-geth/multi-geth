@@ -109,6 +109,19 @@ func TestCalcDifficultyDifficultyDelayConfigVSForkFeatureConfig(t *testing.T) {
 	if !mainA.IsEIP1234F(testN) || !mainA.IsEIP649F(testN) {
 		t.Fatal("test requires reference config to use fork features to compare to difficulty delay map")
 	}
+	if len(mainA.DifficultyBombDelays) != 0 {
+		t.Fatal("test requires reference config to use empty difficulty delay map")
+	}
+
+	mainB.ByzantiumBlock = nil
+	mainB.ConstantinopleBlock = nil
+	mainB.EIP100FBlock = mainA.ByzantiumBlock // Needs for EIP100 adjustment
+	if mainB.IsEIP1234F(testN) || mainB.IsEIP649F(testN) {
+		t.Fatal("test requires compared config to use no fork features configure difficulty delay (map only)")
+	}
+	if len(mainB.DifficultyBombDelays) == 0 {
+		t.Fatal("test requires compared config to use existing difficulty delay map")
+	}
 
 	for name, test := range tests {
 		number := new(big.Int).Sub(test.CurrentBlocknumber, big.NewInt(1))
@@ -141,7 +154,7 @@ func TestCalcDifficultyDifficultyDelayConfigVSForkFeatureConfig(t *testing.T) {
 		})
 
 		if diffA.Cmp(diffB) != 0 {
-			t.Errorf("%s: want: %v, got: %v", name, diffA, diffB)
+			t.Errorf("%s: want: %v w/ %v, got: %v w/ %v", name, diffA, mainA, diffB, mainB.DifficultyBombDelays)
 		}
 	}
 
