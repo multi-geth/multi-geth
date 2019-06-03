@@ -365,15 +365,14 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 
 	} else if len(config.DifficultyBombDelays) > 0 {
 
-		// Find the latest applicable delay.
-		greatestRelevantActivation := new(big.Int)
+		// This logic varies from the original fork-based logic (below) in that
+		// configured delay values are treated as compounding values (2000000 + 3000000 = 5000000@constantinople)
+		// as opposed to hardcoded pre-compounded values (5000000@constantinople).
+		// Thus the Add-ing.
 		activatedDuration := big.NewInt(0)
 		for activated, dur := range config.DifficultyBombDelays {
 			if exPeriodRef.Cmp(activated) < 0 {
 				continue
-			}
-			if greatestRelevantActivation == nil {
-				greatestRelevantActivation.Set(activated)
 			}
 			activatedDuration.Add(activatedDuration, dur)
 		}
