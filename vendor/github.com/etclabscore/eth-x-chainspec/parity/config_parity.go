@@ -4,7 +4,7 @@ import (
 	xchain "github.com/etclabscore/eth-x-chainspec"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereumclassic/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // Config is the data structure for Parity-Ethereum's chain configuration.

@@ -59,6 +59,11 @@ func (u *Uint64) Uint64() uint64 {
 	return uint64(*u)
 }
 
+func FromUint64(i uint64) *Uint64 {
+	u := Uint64(i)
+	return &u
+}
+
 type BlockReward map[Uint64]*hexutil.Big
 
 func (br *BlockReward) UnmarshalJSON(input []byte) error {

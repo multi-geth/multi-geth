@@ -117,16 +117,16 @@
 			"revisionTime": "2018-01-22T22:25:45Z"
 		},
 		{
-			"checksumSHA1": "VZefDIxQxPrPvBimm5ToEV2rrU0=",
+			"checksumSHA1": "jgjmwnsYOTg7f5lnFJuzD+dGHK4=",
 			"path": "github.com/etclabscore/eth-x-chainspec",
-			"revision": "fed89e92293c3823d2f3630823a4f3770ab769d4",
-			"revisionTime": "2019-06-04T01:35:06Z"
+			"revision": "33de9d4c2dc5a2773a56dd44ad34fd8e0512d126",
+			"revisionTime": "2019-06-04T16:03:43Z"
 		},
 		{
-			"checksumSHA1": "lqqmZiq6fg93GjK5kNSh2WXkE/Y=",
+			"checksumSHA1": "Ftj2VQiJozxoC3Jo2glBFJzBLqU=",
 			"path": "github.com/etclabscore/eth-x-chainspec/parity",
-			"revision": "fed89e92293c3823d2f3630823a4f3770ab769d4",
-			"revisionTime": "2019-06-04T01:35:06Z"
+			"revision": "33de9d4c2dc5a2773a56dd44ad34fd8e0512d126",
+			"revisionTime": "2019-06-04T16:03:43Z"
 		},
 		{
 			"checksumSHA1": "7oFpbmDfGobwKsFLIf6wMUvVoKw=",
