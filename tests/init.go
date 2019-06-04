@@ -21,14 +21,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
-	"os"
 	"path/filepath"
 
 	xchainparity "github.com/etclabscore/eth-x-chainspec/parity"
 	"github.com/ethereum/go-ethereum/params"
 )
 
-var chainspecsDir = filepath.Join(os.Getenv("GOPATH"), "src/github.com/ethereum/go-ethereum/tests/chainspecs")
+var chainspecsDir = filepath.Join(".", "chainspecs")
 
 func mustReadChainspec(specFilename string) *params.ChainConfig {
 	chainspecFile := filepath.Join(chainspecsDir, specFilename)
