@@ -117,6 +117,18 @@
 			"revisionTime": "2018-01-22T22:25:45Z"
 		},
 		{
+			"checksumSHA1": "VZefDIxQxPrPvBimm5ToEV2rrU0=",
+			"path": "github.com/etclabscore/eth-x-chainspec",
+			"revision": "fed89e92293c3823d2f3630823a4f3770ab769d4",
+			"revisionTime": "2019-06-04T01:35:06Z"
+		},
+		{
+			"checksumSHA1": "lqqmZiq6fg93GjK5kNSh2WXkE/Y=",
+			"path": "github.com/etclabscore/eth-x-chainspec/parity",
+			"revision": "fed89e92293c3823d2f3630823a4f3770ab769d4",
+			"revisionTime": "2019-06-04T01:35:06Z"
+		},
+		{
 			"checksumSHA1": "7oFpbmDfGobwKsFLIf6wMUvVoKw=",
 			"path": "github.com/fatih/color",
 			"revision": "5ec5d9d3c2cf82e9688b34e9bc27a94d616a7193",
