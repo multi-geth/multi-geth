@@ -37,8 +37,6 @@ var (
 		EIP158Block:         nil,
 		ByzantiumBlock:      nil,
 		DisposalBlock:       big.NewInt(0),
-		SocialBlock:         nil,
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160FBlock:        big.NewInt(0),

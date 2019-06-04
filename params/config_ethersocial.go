@@ -37,15 +37,10 @@ var (
 		EIP158Block:         big.NewInt(845000),
 		ByzantiumBlock:      big.NewInt(600000),
 		DisposalBlock:       nil,
-		SocialBlock:         nil,
-		EthersocialBlock:    big.NewInt(0),
 		ConstantinopleBlock: nil,
 		Ethash:              new(EthashConfig),
+		BlockRewardSchedule: BlockRewardScheduleT{
+			big.NewInt(0): big.NewInt(5e+18),
+		},
 	}
-
-	EthersocialBlockReward = big.NewInt(5e+18) // Block reward in wei for successfully mining a block upward for Ethersocial Network
 )
-
-func (c *ChainConfig) IsEthersocial(num *big.Int) bool {
-	return isForked(c.EthersocialBlock, num)
-}
