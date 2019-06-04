@@ -50,18 +50,29 @@ func mustReadChainspec(specFilename string) *params.ChainConfig {
 	return mggen.Config
 }
 
+var (
+	FrontierChainspec             = mustReadChainspec("frontier_test.json")
+	HomesteadChainspec            = mustReadChainspec("homestead_test.json")
+	EIP150Chainspec               = mustReadChainspec("eip150_test.json")
+	EIP158Chainspec               = mustReadChainspec("eip161_test.json")
+	ByzantiumChainspec            = mustReadChainspec("byzantium_test.json")
+	ConstantinopleChainspec       = mustReadChainspec("constantinople_test.json")
+	ConstantinopleFixChainspec    = mustReadChainspec("st_peters_test.json")
+	EIP158ToByzantiumAt5Chainspec = mustReadChainspec("transition_test.json")
+)
+
 // Forks table defines supported forks and their chain config.
 var Forks = map[string]*params.ChainConfig{
 	// https://github.com/paritytech/parity-ethereum/blob/1871275ecdf02431bf67d09a1b25be8ff8916e3a/ethcore/src/client/evm_test_client.rs#L98
 	// https://github.com/paritytech/parity-ethereum/blob/0199acbece836c49e07410796c40c185e9051451/ethcore/src/ethereum/mod.rs#L129
-	"Frontier":             mustReadChainspec("frontier_test.json"),
-	"Homestead":            mustReadChainspec("homestead_test.json"),
-	"EIP150":               mustReadChainspec("eip150_test.json"),
-	"EIP158":               mustReadChainspec("eip161_test.json"),
-	"Byzantium":            mustReadChainspec("byzantium_test.json"),
-	"Constantinople":       mustReadChainspec("constantinople_test.json"),
-	"ConstantinopleFix":    mustReadChainspec("st_peters_test.json"),
-	"EIP158ToByzantiumAt5": mustReadChainspec("transition_test.json"),
+	"Frontier":             FrontierChainspec,
+	"Homestead":            HomesteadChainspec,
+	"EIP150":               EIP150Chainspec,
+	"EIP158":               EIP158Chainspec,
+	"Byzantium":            ByzantiumChainspec,
+	"Constantinople":       ConstantinopleChainspec,
+	"ConstantinopleFix":    ConstantinopleFixChainspec,
+	"EIP158ToByzantiumAt5": EIP158ToByzantiumAt5Chainspec,
 
 	// "Frontier": {
 	// 	ChainID: big.NewInt(1),
