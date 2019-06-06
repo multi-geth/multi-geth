@@ -35,6 +35,13 @@ var (
 		EIP155Block:    big.NewInt(2675000),
 		EIP158Block:    big.NewInt(2675000),
 		ByzantiumBlock: big.NewInt(4370000),
+		BlockRewardSchedule: params.BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x4563918244f40000)),
+			big.NewInt(4370000):                 new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+		},
+		DifficultyBombDelays: params.DifficultyBombDelaysT{
+			big.NewInt(4370000): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+		},
 	}
 )
 
@@ -65,6 +72,12 @@ func TestDifficulty(t *testing.T) {
 
 	dt.config("Byzantium", params.ChainConfig{
 		ByzantiumBlock: big.NewInt(0),
+		BlockRewardSchedule: params.BlockRewardScheduleT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+		},
+		DifficultyBombDelays: params.DifficultyBombDelaysT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+		},
 	})
 
 	dt.config("Frontier", *params.TestnetChainConfig)
@@ -72,6 +85,13 @@ func TestDifficulty(t *testing.T) {
 	dt.config("CustomMainNetwork", mainnetChainConfig)
 	dt.config("Constantinople", params.ChainConfig{
 		ConstantinopleBlock: big.NewInt(0),
+		BlockRewardSchedule: params.BlockRewardScheduleT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
+		DifficultyBombDelays: params.DifficultyBombDelaysT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
 	})
 	dt.config("difficulty.json", mainnetChainConfig)
 

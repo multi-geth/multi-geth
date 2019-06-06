@@ -42,5 +42,8 @@ var (
 		BlockRewardSchedule: BlockRewardScheduleT{
 			big.NewInt(0): big.NewInt(5e+18),
 		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			big.NewInt(600000): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+		},
 	}
 )
