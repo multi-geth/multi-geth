@@ -33,11 +33,14 @@ func mustReadChainspec(specFilename string) *params.ChainConfig {
 	chainspecFile := filepath.Join(chainspecsDir, specFilename)
 	b, err := ioutil.ReadFile(chainspecFile)
 	if err != nil {
-		panic("read config file " + chainspecFile)
+		return nil
 	}
+	return mustReadChainspecBytes(b)
+}
 
+func mustReadChainspecBytes(input []byte) *params.ChainConfig {
 	pc := xchainparity.Config{}
-	err = json.Unmarshal(b, &pc)
+	err := json.Unmarshal(input, &pc)
 	if err != nil {
 		panic("unmarshal chainspec")
 	}
@@ -47,6 +50,7 @@ func mustReadChainspec(specFilename string) *params.ChainConfig {
 		panic("nil genesis converted")
 	}
 	return mggen.Config
+
 }
 
 var (
