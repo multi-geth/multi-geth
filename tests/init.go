@@ -17,11 +17,25 @@
 package tests
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/cmd/utils"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/params"
 )
+
+var testVMConfig vm.Config
+
+func init() {
+	testVMConfig = vm.Config{}
+	flag.StringVar(&testVMConfig.EVMInterpreter, utils.EVMInterpreterFlag.Name, utils.EVMInterpreterFlag.Value, utils.EVMInterpreterFlag.Usage)
+	flag.StringVar(&testVMConfig.EWASMInterpreter, utils.EWASMInterpreterFlag.Name, utils.EWASMInterpreterFlag.Value, utils.EWASMInterpreterFlag.Usage)
+	flag.Parse()
+	log.Println("evm interpreter=", testVMConfig.EVMInterpreter)
+}
 
 // Forks table defines supported forks and their chain config.
 var Forks = map[string]*params.ChainConfig{
