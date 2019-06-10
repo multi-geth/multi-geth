@@ -1,6 +1,12 @@
 :construction: Toward building a chain configuration standard that can be implemented by
 any Ethereum-ready client to describe and configure chain parameters.
 
+#### Develop
+
+```shell
+./parity/chainspec-validation-test.sh
+```
+
 #### Why
 
 The two most popular clients in the Ethereum ecosystem, [Parity](https://github.com/paritytech/parity-ethereum) and [Geth](https://github.com/ethereum/go-ethereum) use different patterns for external chain and network definitions. This is annoying. 
@@ -24,6 +30,7 @@ A standardized way to describe Ethereum-ecosystem chain configuration.
 #### How
 
 Develop and document a spec here, then propose via EIP and ECIP (et al?) channels.
+
 
 
 #### Resources

@@ -68,12 +68,15 @@ type BlockReward map[Uint64]*hexutil.Big
 
 func (br *BlockReward) UnmarshalJSON(input []byte) error {
 	if input[0] != '{' {
-		var hb = new(hexutil.Big)
-		if err := hb.UnmarshalJSON(input); err != nil {
+		sinput, err := strconv.Unquote(string(input))
+		if err != nil {
 			return err
 		}
-		zero := Uint64(0)
-		*br = BlockReward{zero: hb}
+		bb, err := hexutil.DecodeBig(sinput)
+		if err != nil {
+			return err
+		}
+		*br = BlockReward{Uint64(0): (*hexutil.Big)(bb)}
 		return nil
 	}
 
