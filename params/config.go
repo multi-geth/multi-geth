@@ -571,9 +571,17 @@ func (c *ChainConfig) EthashBlockReward(n *big.Int) *big.Int {
 	if c == nil || n == nil {
 		return blockReward
 	}
+	// Because the map is not necessarily sorted low-high, we
+	// have to ensure that we're walking upwards only.
+	var lastActivation *big.Int
 	for activation, reward := range c.BlockRewardSchedule {
 		if isForked(activation, n) {
-			blockReward = reward
+			if lastActivation == nil {
+				lastActivation = new(big.Int).Set(activation)
+			}
+			if activation.Cmp(lastActivation) >= 0 {
+				blockReward = reward
+			}
 		}
 	}
 	return blockReward
