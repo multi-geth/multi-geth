@@ -1483,56 +1483,24 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Override any default configs for hard coded networks.
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDTestnet
-		}
 		cfg.Genesis = core.DefaultTestnetGenesisBlock()
 	case ctx.GlobalBool(ClassicFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDClassic
-		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
 	case ctx.GlobalBool(SocialFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDSocial
-		}
 		cfg.Genesis = core.DefaultSocialGenesisBlock()
 	case ctx.GlobalBool(EthersocialFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDEthersocial
-		}
 		cfg.Genesis = core.DefaultEthersocialGenesisBlock()
-
 	case ctx.GlobalBool(MusicoinFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 7762959
-		}
 		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
-
 	case ctx.GlobalBool(RinkebyFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDRinkeby
-		}
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
 	case ctx.GlobalBool(KottiFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDKotti
-		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(MixFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDMix
-		}
 		cfg.Genesis = core.DefaultMixGenesisBlock()
 	case ctx.GlobalBool(GoerliFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDGoerli
-		}
 		cfg.Genesis = core.DefaultGoerliGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDDeveloper
-		}
 		// Create new developer account or reuse existing one
 		var (
 			developer accounts.Account
@@ -1552,9 +1520,15 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		log.Info("Using developer account", "address", developer.Address)
 
 		cfg.Genesis = core.DeveloperGenesisBlock(uint64(ctx.GlobalInt(DeveloperPeriodFlag.Name)), developer.Address)
+
+		cfg.Genesis.Config.NetworkID = params.NetworkIDDeveloper
 		if !ctx.GlobalIsSet(MinerGasPriceFlag.Name) && !ctx.GlobalIsSet(MinerLegacyGasPriceFlag.Name) {
 			cfg.Miner.GasPrice = big.NewInt(1)
 		}
+	}
+
+	if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+		cfg.NetworkId = cfg.Genesis.Config.NetworkID
 	}
 }
 
