@@ -126,7 +126,7 @@ func (t *BlockTest) Run() error {
 
 	validBlocks, err := t.insertBlocks(chain)
 	if err != nil {
-		return err
+		return fmt.Errorf("network=%s, err=%v", t.json.Network, err)
 	}
 	cmlast := chain.CurrentBlock().Hash()
 	if common.Hash(t.json.BestBlock) != cmlast {
