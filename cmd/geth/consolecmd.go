@@ -138,6 +138,12 @@ func remoteConsole(ctx *cli.Context) error {
 				path = filepath.Join(path, "ethersocial")
 			} else if ctx.GlobalBool(utils.MusicoinFlag.Name) {
 				path = filepath.Join(path, "musicoin")
+			} else if ctx.GlobalString(utils.ChainspecParity.Name) != "" {
+				bname := filepath.Base(ctx.GlobalString(utils.ChainspecParity.Name))
+				path = filepath.Join(path, bname)
+				path = strings.TrimSuffix(path, ".json")
+				// Want, eg:
+				// ~/.ethereum/kensington/
 			}
 		}
 		endpoint = fmt.Sprintf("%s/geth.ipc", path)
