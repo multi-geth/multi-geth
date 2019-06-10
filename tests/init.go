@@ -151,13 +151,20 @@ var Forks = map[string]*params.ChainConfig{
 	// 	ByzantiumBlock: big.NewInt(5),
 	// },
 	"ByzantiumToConstantinopleAt5": {
-		ChainID:             big.NewInt(1),
-		HomesteadBlock:      big.NewInt(0),
-		EIP150Block:         big.NewInt(0),
-		EIP155Block:         big.NewInt(0),
-		EIP158Block:         big.NewInt(0),
-		ByzantiumBlock:      big.NewInt(0),
-		ConstantinopleBlock: big.NewInt(5),
+		ChainID:        big.NewInt(1),
+		HomesteadBlock: big.NewInt(0),
+		EIP150Block:    big.NewInt(0),
+		EIP155Block:    big.NewInt(0),
+		EIP158Block:    big.NewInt(0),
+		ByzantiumBlock: big.NewInt(0),
+		BlockRewardSchedule: params.BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0)): new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+			new(big.Int).SetUint64(uint64(5)): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
+		DifficultyBombDelays: params.DifficultyBombDelaysT{
+			new(big.Int).SetUint64(uint64(0)): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			new(big.Int).SetUint64(uint64(5)): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
 	},
 }
 
