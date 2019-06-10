@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	xspecparity "github.com/etclabscore/eth-x-chainspec/parity"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -844,6 +845,19 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.KottiBootnodes
 	case ctx.GlobalBool(GoerliFlag.Name):
 		urls = params.GoerliBootnodes
+	case ctx.GlobalString(ChainspecParity.Name) != "":
+		fpath := ctx.GlobalString(ChainspecParity.Name)
+		b, err := ioutil.ReadFile(fpath)
+		if err != nil {
+			Fatalf("%v", err)
+		}
+		pc := xspecparity.Config{}
+		err = json.Unmarshal(b, &pc)
+		if err != nil {
+			Fatalf("%v", err)
+		}
+		urls = pc.Nodes
+
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
