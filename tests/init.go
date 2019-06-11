@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 
 	xchainparity "github.com/etclabscore/eth-x-chainspec/parity"
+	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/params"
 )
 
@@ -45,7 +46,7 @@ func mustReadChainspecBytes(input []byte) *params.ChainConfig {
 		panic("unmarshal chainspec")
 	}
 
-	mggen := pc.ToMultiGethGenesis()
+	mggen := core.ParityConfigToMultiGethGenesis(&pc)
 	if mggen == nil {
 		panic("nil genesis converted")
 	}
