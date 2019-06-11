@@ -138,8 +138,8 @@ func remoteConsole(ctx *cli.Context) error {
 				path = filepath.Join(path, "ethersocial")
 			} else if ctx.GlobalBool(utils.MusicoinFlag.Name) {
 				path = filepath.Join(path, "musicoin")
-			} else if ctx.GlobalString(utils.ChainspecParity.Name) != "" {
-				bname := filepath.Base(ctx.GlobalString(utils.ChainspecParity.Name))
+			} else if ctx.GlobalString(utils.ChainspecParityFlag.Name) != "" {
+				bname := filepath.Base(ctx.GlobalString(utils.ChainspecParityFlag.Name))
 				path = filepath.Join(path, bname)
 				path = strings.TrimSuffix(path, ".json")
 				// Want, eg:

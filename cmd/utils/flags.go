@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	xspecparity "github.com/etclabscore/eth-x-chainspec/parity"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -131,7 +130,7 @@ var (
 		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby, 6=Kotti)",
 		Value: eth.DefaultConfig.NetworkId,
 	}
-	ChainspecParity = cli.StringFlag{
+	ChainspecParityFlag = cli.StringFlag{
 		Name:  "chainspec.parity",
 		Usage: "Read chain configuration from Parity chainspec format",
 	}
@@ -768,8 +767,8 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(GoerliFlag.Name) {
 			return filepath.Join(path, "goerli")
 		}
-		if ctx.GlobalString(ChainspecParity.Name) != "" {
-			bname := filepath.Base(ctx.GlobalString(ChainspecParity.Name))
+		if ctx.GlobalString(ChainspecParityFlag.Name) != "" {
+			bname := filepath.Base(ctx.GlobalString(ChainspecParityFlag.Name))
 			path = filepath.Join(path, bname)
 			path = strings.TrimSuffix(path, ".json")
 			return path
@@ -845,18 +844,12 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.KottiBootnodes
 	case ctx.GlobalBool(GoerliFlag.Name):
 		urls = params.GoerliBootnodes
-	case ctx.GlobalString(ChainspecParity.Name) != "":
-		fpath := ctx.GlobalString(ChainspecParity.Name)
-		b, err := ioutil.ReadFile(fpath)
+	case ctx.GlobalString(ChainspecParityFlag.Name) != "":
+		nodes, err := core.ReadInBootnodesFromParityChainspec(ctx.GlobalString(ChainspecParityFlag.Name))
 		if err != nil {
 			Fatalf("%v", err)
 		}
-		pc := xspecparity.Config{}
-		err = json.Unmarshal(b, &pc)
-		if err != nil {
-			Fatalf("%v", err)
-		}
-		urls = pc.Nodes
+		urls = nodes
 
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
@@ -1248,8 +1241,8 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "kotti")
 	case ctx.GlobalBool(GoerliFlag.Name):
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
-	case ctx.GlobalString(ChainspecParity.Name) != "":
-		bname := filepath.Base(ctx.GlobalString(ChainspecParity.Name))
+	case ctx.GlobalString(ChainspecParityFlag.Name) != "":
+		bname := filepath.Base(ctx.GlobalString(ChainspecParityFlag.Name))
 		path := filepath.Join(node.DefaultDataDir(), bname)
 		path = strings.TrimSuffix(path, ".json")
 		cfg.DataDir = path
@@ -1444,7 +1437,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, GoerliFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag, MusicoinFlag, ChainspecParity)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, GoerliFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag, MusicoinFlag, ChainspecParityFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	// Can't use both ephemeral unlocked and external signer
@@ -1561,7 +1554,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		}
 	}
 
-	if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+	if !ctx.GlobalIsSet(NetworkIdFlag.Name) && cfg.Genesis != nil {
 		cfg.NetworkId = cfg.Genesis.Config.NetworkID
 	}
 }
@@ -1704,9 +1697,9 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 		genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(GoerliFlag.Name):
 		genesis = core.DefaultGoerliGenesisBlock()
-	case ctx.GlobalString(ChainspecParity.Name) != "":
+	case ctx.GlobalString(ChainspecParityFlag.Name) != "":
 		var err error
-		genesis, err = core.ReadInGenesisBlockFromParityChainSpec(ctx.GlobalString(ChainspecParity.Name))
+		genesis, err = core.ReadInGenesisBlockFromParityChainSpec(ctx.GlobalString(ChainspecParityFlag.Name))
 		if err != nil {
 			Fatalf("failed to read parity chainspec: err=%v", err)
 		}
