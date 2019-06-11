@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	math2 "github.com/ethereum/go-ethereum/common/math"
 )
 
 // Config is the data structure for Parity-Ethereum's chain configuration.
@@ -22,7 +23,7 @@ type ConfigAccounts map[string]ConfigAccountValue
 
 type ConfigAccountValue struct {
 	Nonce   *xchain.ConfigAccountNonce  `json:"nonce,omitempty"`
-	Balance string                      `json:"balance,omitempty"`
+	Balance math2.HexOrDecimal256       `json:"balance,omitempty"`
 	Code    []byte                      `json:"code,omitempty"`
 	Storage map[common.Hash]common.Hash `json:"storage,omitempty"`
 
