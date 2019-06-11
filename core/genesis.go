@@ -399,6 +399,7 @@ func ReadInBootnodesFromParityChainspec(fpath string) ([]string, error) {
 }
 
 func ReadInGenesisBlockFromParityChainSpec(fpath string) (*Genesis, error) {
+	log.Info("Reading chainspec (parity format)", "filepath", fpath)
 	b, err := ioutil.ReadFile(fpath)
 	if err != nil {
 		return nil, err
