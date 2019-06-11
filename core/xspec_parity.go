@@ -9,7 +9,6 @@ import (
 	xchainparity "github.com/etclabscore/eth-x-chainspec/parity"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	math2 "github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 )
@@ -63,14 +62,14 @@ func ParityConfigFromMultiGethGenesis(name string, c *xchainparity.Config, mgg *
 		// existing val.
 		if pre, ok := c.Accounts[a.Hex()]; ok {
 			pre.Nonce = &n
-			pre.Balance = math2.HexOrDecimal256(*v.Balance)
+			pre.Balance = v.Balance.String()
 			pre.Code = v.Code
 			pre.Storage = v.Storage
 			c.Accounts[a.Hex()] = pre
 		} else {
 			pv := xchainparity.ConfigAccountValue{
 				Nonce:   &n,
-				Balance: math2.HexOrDecimal256(*v.Balance),
+				Balance: v.Balance.String(),
 				Code:    v.Code,
 				Storage: v.Storage,
 			}
@@ -329,7 +328,10 @@ func ParityConfigToMultiGethGenesis(c *xchainparity.Config) *Genesis {
 
 	accountsloop:
 		for k, v := range c.Accounts {
-			bal := (big.Int)(v.Balance)
+			bal, ok := xchain.ParseBig256(v.Balance)
+			if !ok {
+				panic("error setting genesis account balance")
+			}
 			var nonce uint64
 			if v.Nonce != nil {
 				nonce = uint64(*v.Nonce)
@@ -351,7 +353,7 @@ func ParityConfigToMultiGethGenesis(c *xchainparity.Config) *Genesis {
 
 			mgg.Alloc[addr] = GenesisAccount{
 				Nonce:   nonce,
-				Balance: &bal,
+				Balance: bal,
 				Code:    v.Code,
 				Storage: v.Storage,
 			}

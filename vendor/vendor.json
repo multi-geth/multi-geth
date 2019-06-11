@@ -95,14 +95,14 @@
 		{
 			"checksumSHA1": "PoAzwKn7Tmw/U5cgjMEjb/Qen5A=",
 			"path": "github.com/etclabscore/eth-x-chainspec",
-			"revision": "47e34b489a9b99ee2b40cae35ab44b36efddb48e",
-			"revisionTime": "2019-06-11T20:44:39Z"
+			"revision": "997c9e3b4d0f9ad102265477454b39650c41bcd5",
+			"revisionTime": "2019-06-11T20:28:03Z"
 		},
 		{
-			"checksumSHA1": "iRF3T2X/E45c5bZoDnZUxN++5DA=",
+			"checksumSHA1": "ypYheuLKlmFPOlGD+0/N96j1EnU=",
 			"path": "github.com/etclabscore/eth-x-chainspec/parity",
-			"revision": "47e34b489a9b99ee2b40cae35ab44b36efddb48e",
-			"revisionTime": "2019-06-11T20:44:39Z"
+			"revision": "233cbabf705e3dd9d4c93c6ff7b0121ea6071ee1",
+			"revisionTime": "2019-06-10T14:16:03Z"
 		},
 		{
 			"checksumSHA1": "7oFpbmDfGobwKsFLIf6wMUvVoKw=",
