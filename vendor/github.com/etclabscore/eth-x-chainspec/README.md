@@ -5,7 +5,8 @@ any Ethereum-ready client to describe and configure chain parameters.
 
 ```shell
 ./parity/chainspec-validation-test.sh
-```
+
+`
 
 #### Why
 

@@ -26,8 +26,6 @@ type ConfigAccountValue struct {
 	Code    []byte                      `json:"code,omitempty"`
 	Storage map[common.Hash]common.Hash `json:"storage,omitempty"`
 
-	// core.GenesisAccount
-
 	Builtin *ConfigAccountValueBuiltin `json:"builtin,omitempty"`
 }
 type ConfigAccountValueBuiltin struct {
