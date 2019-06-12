@@ -54,7 +54,7 @@ func ParityConfigFromMultiGethGenesis(name string, c *xchainparity.Config, mgg *
 	c.Genesis.ParentHash = &mgg.ParentHash
 	c.Genesis.ExtraData = mgg.ExtraData
 
-	WithPrecompiledContractsFromMultiGeth(c, mgg)
+	ParityConfigWithPrecompiledContractsFromMultiGeth(c, mgg)
 
 	for a, v := range mgg.Alloc {
 		n := xchain.ConfigAccountNonce(v.Nonce)
@@ -185,7 +185,7 @@ func ParityConfigFromMultiGethGenesis(name string, c *xchainparity.Config, mgg *
 	return nil
 }
 
-func BuiltinContracts(c *xchainparity.Config) (builtins []xchainparity.ConfigAccountValueBuiltin) {
+func ParityConfigBuiltinContracts(c *xchainparity.Config) (builtins []xchainparity.ConfigAccountValueBuiltin) {
 	for _, v := range c.Accounts {
 		if v.Builtin != nil {
 			b := v.Builtin
@@ -239,7 +239,7 @@ func ParityConfigToMultiGethGenesis(c *xchainparity.Config) *Genesis {
 		// 649 - metro diff bomb, block reward
 		mgc.EIP658FBlock = pars.EIP658Transition.Big()
 
-		parityBuiltins := BuiltinContracts(c)
+		parityBuiltins := ParityConfigBuiltinContracts(c)
 		for _, pc := range parityBuiltins {
 			if pc.ActivateAt != nil {
 				switch *pc.Name {
@@ -420,7 +420,7 @@ func setMultiGethDAOConfigsFromParity(mgc *params.ChainConfig, pars *xchainparit
 	}
 }
 
-func WithPrecompiledContractsFromMultiGeth(c *xchainparity.Config, mgg *Genesis) {
+func ParityConfigWithPrecompiledContractsFromMultiGeth(c *xchainparity.Config, mgg *Genesis) {
 	c.Accounts = make(xchainparity.ConfigAccounts, 0)
 
 	ecrecover := "ecrecover"
