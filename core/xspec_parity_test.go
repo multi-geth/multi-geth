@@ -110,18 +110,8 @@ func TestX1(t *testing.T) {
 				}
 			} else if !reflect.DeepEqual(wantG, mg) {
 				t.Error(spew.Sdump(wantG), spew.Sdump(mg))
-
-			} else {
-				// debugging the fixme above
-				// t.Log(spew.Sdump(wantG), spew.Sdump(mg))
 			}
 		}
-		// also debugging the fixme above
-		// if f.Name() == "foundation.json" {
-		// scs := spew.ConfigState{Indent: "\t", DisableMethods: true}
-		// t.Log(scs.Sdump(params.MainnetChainConfig))
-		// t.Log(scs.Sdump(mg.Config))
-		// }
 	}
 }
 
