@@ -857,18 +857,6 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	if c.IsEIP155(head) && !configNumEqual(c.ChainID, newcfg.ChainID) {
 		return newCompatError("EIP155 chain ID", c.EIP155Block, newcfg.EIP155Block)
 	}
-	// Either Byzantium block must be set OR EIP100 and EIP649 must be equivalent
-	if newcfg.ByzantiumBlock == nil {
-		if !configNumEqual(newcfg.EIP100FBlock, newcfg.EIP649FBlock) {
-			return newCompatError("EIP100F/EIP649F not equal", newcfg.EIP100FBlock, newcfg.EIP649FBlock)
-		}
-		if isForkIncompatible(c.EIP100FBlock, newcfg.EIP649FBlock, head) {
-			return newCompatError("EIP100F/EIP649F fork block", c.EIP100FBlock, newcfg.EIP649FBlock)
-		}
-		if isForkIncompatible(c.EIP649FBlock, newcfg.EIP100FBlock, head) {
-			return newCompatError("EIP649F/EIP100F fork block", c.EIP649FBlock, newcfg.EIP100FBlock)
-		}
-	}
 	if isForkIncompatible(c.PetersburgBlock, newcfg.PetersburgBlock, head) {
 		return newCompatError("ConstantinopleFix fork block", c.PetersburgBlock, newcfg.PetersburgBlock)
 	}
