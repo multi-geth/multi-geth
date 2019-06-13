@@ -102,13 +102,13 @@ func TestX1(t *testing.T) {
 			// The read values prefer the FEATURE based fields, while the hardcoded configs still use the hardfork fields.
 			// So I would expect the DeepEquals checks to say that the struct values are NOT equal.
 			t.Log("comparing configs read vs hardcoded", f.Name())
-			if diff := deep.Equal(wantG, mg); diff != nil {
-				for _, d := range diff {
-					if !strings.Contains(d, "EIP150Hash") {
-						t.Error(fname, d)
-					}
+			diff := deep.Equal(wantG, mg)
+			for _, d := range diff {
+				if !strings.Contains(d, "EIP150Hash") {
+					t.Error(fname, d)
 				}
-			} else if !reflect.DeepEqual(wantG, mg) {
+			}
+			if len(diff) == 0 && !reflect.DeepEqual(wantG, mg) {
 				t.Error(spew.Sdump(wantG), spew.Sdump(mg))
 			}
 		}

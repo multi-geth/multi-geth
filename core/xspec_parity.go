@@ -421,7 +421,7 @@ func setMultiGethDAOConfigsFromParity(mgc *params.ChainConfig, pars *xchainparit
 }
 
 func ParityConfigWithPrecompiledContractsFromMultiGeth(c *xchainparity.Config, mgg *Genesis) {
-	c.Accounts = make(xchainparity.ConfigAccounts, 0)
+	c.Accounts = make(xchainparity.ConfigAccounts)
 
 	ecrecover := "ecrecover"
 	c.Accounts[common.BytesToAddress([]byte{1}).Hex()] = xchainparity.ConfigAccountValue{
