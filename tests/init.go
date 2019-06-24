@@ -151,7 +151,7 @@ var Forks = map[string]*params.ChainConfig{
 	// 	EIP158Block:    big.NewInt(0),
 	// 	ByzantiumBlock: big.NewInt(5),
 	// },
-	"ByzantiumToConstantinopleAt5": {
+	"ByzantiumToConstantinopleFixAt5": {
 		ChainID:        big.NewInt(1),
 		HomesteadBlock: big.NewInt(0),
 		EIP150Block:    big.NewInt(0),
