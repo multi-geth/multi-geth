@@ -38,11 +38,8 @@ import (
 
 // Ethash proof-of-work protocol constants.
 var (
-	FrontierBlockReward    = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
-	EIP649FBlockReward     = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
-	EIP1234FBlockReward    = big.NewInt(2e+18) // Block reward in wei for successfully mining a block upward from Constantinople
-	maxUncles              = 2                 // Maximum number of uncles allowed in a single block
-	allowedFutureBlockTime = 15 * time.Second  // Max time from current time allowed for blocks, before they're considered future blocks
+	maxUncles              = 2                // Maximum number of uncles allowed in a single block
+	allowedFutureBlockTime = 15 * time.Second // Max time from current time allowed for blocks, before they're considered future blocks
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -366,31 +363,18 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 	if config.IsBombDisposal(next) {
 		return out
 
-	} else if config.IsEIP1234F(next) {
-		// calcDifficultyEIP1234 is the difficulty adjustment algorithm for Constantinople.
-		// The calculation uses the Byzantium rules, but with bomb offset 5M.
-		// Specification EIP-1234: https://eips.ethereum.org/EIPS/eip-1234
-		// Note, the calculations below looks at the parent number, which is 1 below
-		// the block number. Thus we remove one from the delay given
+	} else if len(config.DifficultyBombDelays) > 0 {
 
-		// calculate a fake block number for the ice-age delay
-		// Specification: https://eips.ethereum.org/EIPS/eip-1234
-		fakeBlockNumber := new(big.Int)
-		if parent.Number.Cmp(big.NewInt(4999999)) >= 0 {
-			fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big.NewInt(4999999))
-		}
-		exPeriodRef.Set(fakeBlockNumber)
-
-	} else if config.IsEIP649F(next) {
-		// The calculation uses the Byzantium rules, with bomb offset of 3M.
-		// Specification EIP-649: https://eips.ethereum.org/EIPS/eip-649
-		// Related meta-ish EIP-669: https://github.com/ethereum/EIPs/pull/669
-		// Note, the calculations below looks at the parent number, which is 1 below
-		// the block number. Thus we remove one from the delay given
-
-		fakeBlockNumber := new(big.Int)
-		if parent.Number.Cmp(big.NewInt(2999999)) >= 0 {
-			fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big.NewInt(2999999))
+		// This logic varies from the original fork-based logic (below) in that
+		// configured delay values are treated as compounding values (-2000000 + -3000000 = -5000000@constantinople)
+		// as opposed to hardcoded pre-compounded values (-5000000@constantinople).
+		// Thus the Sub-ing.
+		fakeBlockNumber := new(big.Int).Set(exPeriodRef)
+		for activated, dur := range config.DifficultyBombDelays {
+			if exPeriodRef.Cmp(activated) < 0 {
+				continue
+			}
+			fakeBlockNumber.Sub(fakeBlockNumber, dur)
 		}
 		exPeriodRef.Set(fakeBlockNumber)
 
@@ -561,42 +545,30 @@ var (
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	// Select the correct block reward based on chain progression
-	blockReward := FrontierBlockReward
-	if config.IsEIP649F(header.Number) {
-		blockReward = EIP649FBlockReward
-	}
-	if config.IsEIP1234F(header.Number) {
-		blockReward = EIP1234FBlockReward
-	}
-	if config.IsSocial(header.Number) {
-		blockReward = params.SocialBlockReward
-	}
-	if config.IsEthersocial(header.Number) {
-		blockReward = params.EthersocialBlockReward
-	}
 	if config.IsMCIP0(header.Number) {
 		musicoinBlockReward(config, state, header, uncles)
 		return
 	}
 	if config.HasECIP1017() {
 		ecip1017BlockReward(config, state, header, uncles)
-	} else {
-		// Accumulate the rewards for the miner and any included uncles
-		reward := new(big.Int).Set(blockReward)
-		r := new(big.Int)
-		for _, uncle := range uncles {
-			r.Add(uncle.Number, big8)
-			r.Sub(r, header.Number)
-			r.Mul(r, blockReward)
-			r.Div(r, big8)
-			state.AddBalance(uncle.Coinbase, r)
-
-			r.Div(blockReward, big32)
-			reward.Add(reward, r)
-		}
-		state.AddBalance(header.Coinbase, reward)
+		return
 	}
+
+	blockReward := config.EthashBlockReward(header.Number)
+	// Accumulate the rewards for the miner and any included uncles
+	reward := new(big.Int).Set(blockReward)
+	r := new(big.Int)
+	for _, uncle := range uncles {
+		r.Add(uncle.Number, big8)
+		r.Sub(r, header.Number)
+		r.Mul(r, blockReward)
+		r.Div(r, big8)
+		state.AddBalance(uncle.Coinbase, r)
+
+		r.Div(blockReward, big32)
+		reward.Add(reward, r)
+	}
+	state.AddBalance(header.Coinbase, reward)
 }
 
 // As of "Era 2" (zero-index era 1), uncle miners and winners are rewarded equally for each included block.

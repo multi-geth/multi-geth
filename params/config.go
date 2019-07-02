@@ -17,10 +17,12 @@
 package params
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // Genesis hashes to enforce below configs on.
@@ -34,6 +36,7 @@ var (
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
+		NetworkID:           1,
 		ChainID:             big.NewInt(1),
 		HomesteadBlock:      big.NewInt(1150000),
 		DAOForkBlock:        big.NewInt(1920000),
@@ -44,11 +47,18 @@ var (
 		EIP158Block:         big.NewInt(2675000),
 		ByzantiumBlock:      big.NewInt(4370000),
 		DisposalBlock:       nil,
-		SocialBlock:         nil,
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: big.NewInt(7280000),
 		PetersburgBlock:     big.NewInt(7280000),
 		Ethash:              new(EthashConfig),
+		BlockRewardSchedule: BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)):      new(big.Int).SetUint64(uint64(0x4563918244f40000)),
+			new(big.Int).SetUint64(uint64(0x42ae50)): new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+			new(big.Int).SetUint64(uint64(0x6f1580)): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			new(big.Int).SetUint64(uint64(0x42ae50)): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			new(big.Int).SetUint64(uint64(0x6f1580)): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
 		TrustedCheckpoint: &TrustedCheckpoint{
 			Name:         "mainnet",
 			SectionIndex: 227,
@@ -60,9 +70,10 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the Ropsten test network.
 	TestnetChainConfig = &ChainConfig{
+		NetworkID:           3,
 		ChainID:             big.NewInt(3),
 		HomesteadBlock:      big.NewInt(0),
-		DAOForkBlock:        nil,
+		DAOForkBlock:        big.NewInt(int64(0x40E80F)),
 		DAOForkSupport:      true,
 		EIP150Block:         big.NewInt(0),
 		EIP150Hash:          common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
@@ -70,11 +81,18 @@ var (
 		EIP158Block:         big.NewInt(10),
 		ByzantiumBlock:      big.NewInt(1700000),
 		DisposalBlock:       nil,
-		SocialBlock:         nil,
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: big.NewInt(4230000),
 		PetersburgBlock:     big.NewInt(4939394),
 		Ethash:              new(EthashConfig),
+		BlockRewardSchedule: BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x4563918244f40000)),
+			big.NewInt(1700000):                 new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+			big.NewInt(4230000):                 new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			big.NewInt(1700000): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			big.NewInt(4230000): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
 		TrustedCheckpoint: &TrustedCheckpoint{
 			Name:         "testnet",
 			SectionIndex: 161,
@@ -86,6 +104,7 @@ var (
 
 	// RinkebyChainConfig contains the chain parameters to run a node on the Rinkeby test network.
 	RinkebyChainConfig = &ChainConfig{
+		NetworkID:           4,
 		ChainID:             big.NewInt(4),
 		HomesteadBlock:      big.NewInt(1),
 		DAOForkBlock:        nil,
@@ -96,13 +115,20 @@ var (
 		EIP158Block:         big.NewInt(3),
 		ByzantiumBlock:      big.NewInt(1035301),
 		DisposalBlock:       nil,
-		SocialBlock:         nil,
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: big.NewInt(3660663),
 		PetersburgBlock:     big.NewInt(4321234),
 		Clique: &CliqueConfig{
 			Period: 15,
 			Epoch:  30000,
+		},
+		BlockRewardSchedule: BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x4563918244f40000)),
+			big.NewInt(1035301):                 new(big.Int).SetUint64(uint64(0x29a2241af62c0000)),
+			big.NewInt(3660663):                 new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			big.NewInt(1035301): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+			big.NewInt(3660663): new(big.Int).SetUint64(uint64(0x1e8480)),
 		},
 		TrustedCheckpoint: &TrustedCheckpoint{
 			Name:         "rinkeby",
@@ -115,6 +141,7 @@ var (
 
 	// GoerliChainConfig contains the chain parameters to run a node on the Görli test network.
 	GoerliChainConfig = &ChainConfig{
+		NetworkID:           5,
 		ChainID:             big.NewInt(5),
 		HomesteadBlock:      big.NewInt(0),
 		DAOForkBlock:        nil,
@@ -128,6 +155,12 @@ var (
 		Clique: &CliqueConfig{
 			Period: 15,
 			Epoch:  30000,
+		},
+		BlockRewardSchedule: BlockRewardScheduleT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x1e8480)),
 		},
 		TrustedCheckpoint: &TrustedCheckpoint{
 			Name:         "goerli",
@@ -144,6 +177,7 @@ var (
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
 	AllEthashProtocolChanges = &ChainConfig{
+		0,
 		big.NewInt(1337), // ChainID
 
 		big.NewInt(0), // HomesteadBlock
@@ -186,8 +220,6 @@ var (
 		nil, // ECIP1010Length
 		nil, // ECIP1017EraRounds
 		nil, // DisposalBlock
-		nil, // SocialBlock
-		nil, // EthersocialBlock
 
 		nil, // Musicoin MCIP0Block UBI
 		nil, // Musicoin MCIP3Block UBI
@@ -195,6 +227,12 @@ var (
 
 		new(EthashConfig), // Ethash
 		nil,               // Clique
+		DifficultyBombDelaysT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
+		BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
 		nil,
 	}
 
@@ -204,6 +242,7 @@ var (
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
 	AllCliqueProtocolChanges = &ChainConfig{
+		0,
 		big.NewInt(1337), // ChainID
 
 		big.NewInt(0), // HomesteadBlock
@@ -246,8 +285,6 @@ var (
 		nil, // ECIP1010Length
 		nil, // ECIP1017EraRounds
 		nil, // DisposalBlock
-		nil, // SocialBlock
-		nil, // EthersocialBlock
 
 		nil, // Musicoin MCIP0Block UBI
 		nil, // Musicoin MCIP3Block UBI
@@ -258,11 +295,18 @@ var (
 			Period: 0,
 			Epoch:  30000,
 		},
+		DifficultyBombDelaysT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
+		BlockRewardScheduleT{
+			big.NewInt(0): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
 		nil,
 	}
 
 	// TestChainConfig is used for tests.
 	TestChainConfig = &ChainConfig{
+		0,
 		big.NewInt(1), // ChainID
 
 		big.NewInt(0), // HomesteadBlock
@@ -305,8 +349,6 @@ var (
 		nil, // ECIP1010Length
 		nil, // ECIP1017EraRounds
 		nil, // DisposalBlock
-		nil, // SocialBlock
-		nil, // EthersocialBlock
 
 		nil, // Musicoin MCIP0Block UBI
 		nil, // Musicoin MCIP3Block UBI
@@ -314,6 +356,12 @@ var (
 
 		new(EthashConfig), // Ethash
 		nil,               // Clique
+		DifficultyBombDelaysT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1e8480)),
+		},
+		BlockRewardScheduleT{
+			new(big.Int).SetUint64(uint64(0x0)): new(big.Int).SetUint64(uint64(0x1bc16d674ec80000)),
+		},
 		nil,
 	}
 
@@ -339,7 +387,8 @@ type TrustedCheckpoint struct {
 // that any network, identified by its genesis block, can have its own
 // set of configuration options.
 type ChainConfig struct {
-	ChainID *big.Int `json:"chainId"` // chainId identifies the current chain and is used for replay protection
+	NetworkID uint64   `json:"networkId"`
+	ChainID   *big.Int `json:"chainId"` // chainId identifies the current chain and is used for replay protection
 
 	// HF: Homestead
 	HomesteadBlock *big.Int `json:"homesteadBlock,omitempty"` // Homestead switch block (nil = no fork, 0 = already homestead)
@@ -441,8 +490,6 @@ type ChainConfig struct {
 	ECIP1010Length     *big.Int `json:"ecip1010Length,omitempty"`     // ECIP1010 length
 	ECIP1017EraRounds  *big.Int `json:"ecip1017EraRounds,omitempty"`  // ECIP1017 era rounds
 	DisposalBlock      *big.Int `json:"disposalBlock,omitempty"`      // Bomb disposal HF block
-	SocialBlock        *big.Int `json:"socialBlock,omitempty"`        // Ethereum Social Reward block
-	EthersocialBlock   *big.Int `json:"ethersocialBlock,omitempty"`   // Ethersocial Reward block
 
 	MCIP0Block *big.Int `json:"mcip0Block,omitempty"` // Musicoin default block; no MCIP, just denotes chain pref
 	MCIP3Block *big.Int `json:"mcip3Block,omitempty"` // Musicoin 'UBI Fork' block
@@ -452,7 +499,100 @@ type ChainConfig struct {
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
 
+	DifficultyBombDelays DifficultyBombDelaysT `json:"difficultyBombDelays,omitempty"`
+	BlockRewardSchedule  BlockRewardScheduleT  `json:"blockReward,omitempty"`
+
 	TrustedCheckpoint *TrustedCheckpoint `json:"trustedCheckpoint"`
+}
+
+type DifficultyBombDelaysT map[*big.Int]*big.Int
+
+func (dbd *DifficultyBombDelaysT) UnmarshalJSON(input []byte) error {
+	var n = make(map[string]string)
+	if err := json.Unmarshal(input, &n); err != nil {
+		return err
+	}
+	d := DifficultyBombDelaysT{}
+	for k, v := range n {
+		kk, err := hexutil.DecodeBig(k)
+		if err != nil {
+			return err
+		}
+		vv, err := hexutil.DecodeBig(v)
+		if err != nil {
+			return err
+		}
+		d[kk] = vv
+	}
+	*dbd = d
+	return nil
+}
+
+func (dbd DifficultyBombDelaysT) MarshalJSON() ([]byte, error) {
+	var m = make(map[string]string)
+	for k, v := range dbd {
+		kk, vv := hexutil.EncodeBig(k), hexutil.EncodeBig(v)
+		m[kk] = vv
+	}
+	return json.Marshal(m)
+}
+
+type BlockRewardScheduleT map[*big.Int]*big.Int
+
+func (brs *BlockRewardScheduleT) UnmarshalJSON(input []byte) error {
+	var n = make(map[string]string)
+	if err := json.Unmarshal(input, &n); err != nil {
+		return err
+	}
+	d := BlockRewardScheduleT{}
+	for k, v := range n {
+		kk, err := hexutil.DecodeBig(k)
+		if err != nil {
+			return err
+		}
+		vv, err := hexutil.DecodeBig(v)
+		if err != nil {
+			return err
+		}
+		d[kk] = vv
+	}
+	*brs = d
+	return nil
+}
+
+func (brs BlockRewardScheduleT) MarshalJSON() ([]byte, error) {
+	var m = make(map[string]string)
+	for k, v := range brs {
+		kk, vv := hexutil.EncodeBig(k), hexutil.EncodeBig(v)
+		m[kk] = vv
+	}
+	return json.Marshal(m)
+}
+
+var FrontierBlockReward = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
+func (c *ChainConfig) EthashBlockReward(n *big.Int) *big.Int {
+	// if c.Ethash == nil {
+	// 	panic("non ethash config called EthashBlockReward")
+	// }
+	// Select the correct block reward based on chain progression
+	blockReward := FrontierBlockReward
+	if c == nil || n == nil {
+		return blockReward
+	}
+	// Because the map is not necessarily sorted low-high, we
+	// have to ensure that we're walking upwards only.
+	var lastActivation *big.Int
+	for activation, reward := range c.BlockRewardSchedule {
+		if isForked(activation, n) {
+			if lastActivation == nil {
+				lastActivation = new(big.Int).Set(activation)
+			}
+			if activation.Cmp(lastActivation) >= 0 {
+				blockReward = reward
+			}
+		}
+	}
+	return blockReward
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -485,7 +625,7 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Disposal: %v Social: %v Ethersocial: %v ECIP1017: %v EIP160: %v ECIP1010PauseBlock: %v ECIP1010Length: %v Constantinople: %v ConstantinopleFix: %v Engine: %v}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v DAO: %v DAOSupport: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Disposal: %v ECIP1017: %v EIP160: %v ECIP1010PauseBlock: %v ECIP1010Length: %v Constantinople: %v ConstantinopleFix: %v Engine: %v}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.DAOForkBlock,
@@ -495,8 +635,6 @@ func (c *ChainConfig) String() string {
 		c.EIP158Block,
 		c.ByzantiumBlock,
 		c.DisposalBlock,
-		c.SocialBlock,
-		c.EthersocialBlock,
 		c.ECIP1017EraRounds,
 		c.EIP160FBlock,
 		c.ECIP1010PauseBlock,
@@ -591,11 +729,6 @@ func (c *ChainConfig) IsEIP214F(num *big.Int) bool {
 	return isForked(c.ByzantiumBlock, num) || isForked(c.EIP214FBlock, num)
 }
 
-// IsEIP649F returns whether num is equal to or greater than the Byzantium or EIP649 block.
-func (c *ChainConfig) IsEIP649F(num *big.Int) bool {
-	return isForked(c.ByzantiumBlock, num) || isForked(c.EIP649FBlock, num)
-}
-
 // IsEIP658F returns whether num is equal to or greater than the Byzantium or EIP658 block.
 func (c *ChainConfig) IsEIP658F(num *big.Int) bool {
 	return isForked(c.ByzantiumBlock, num) || isForked(c.EIP658FBlock, num)
@@ -614,11 +747,6 @@ func (c *ChainConfig) IsEIP1014F(num *big.Int) bool {
 // IsEIP1052F returns whether num is equal to or greater than the Constantinople or EIP1052 block.
 func (c *ChainConfig) IsEIP1052F(num *big.Int) bool {
 	return isForked(c.ConstantinopleBlock, num) || isForked(c.EIP1052FBlock, num)
-}
-
-// IsEIP1234F returns whether num is equal to or greater than the Constantinople or EIP1234 block.
-func (c *ChainConfig) IsEIP1234F(num *big.Int) bool {
-	return isForked(c.ConstantinopleBlock, num) || isForked(c.EIP1234FBlock, num)
 }
 
 // IsEIP1283F returns whether num is equal to or greater than the Constantinople or EIP1283 block.
@@ -705,13 +833,11 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 		{"EIP212F", c.EIP212FBlock, newcfg.EIP212FBlock},
 		{"EIP213F", c.EIP213FBlock, newcfg.EIP213FBlock},
 		{"EIP214F", c.EIP214FBlock, newcfg.EIP214FBlock},
-		{"EIP649F", c.EIP649FBlock, newcfg.EIP649FBlock},
 		{"EIP658F", c.EIP658FBlock, newcfg.EIP658FBlock},
 		{"Constantinople", c.ConstantinopleBlock, newcfg.ConstantinopleBlock},
 		{"EIP145F", c.EIP145FBlock, newcfg.EIP145FBlock},
 		{"EIP1014F", c.EIP1014FBlock, newcfg.EIP1014FBlock},
 		{"EIP1052F", c.EIP1052FBlock, newcfg.EIP1052FBlock},
-		{"EIP1234F", c.EIP1234FBlock, newcfg.EIP1234FBlock},
 		{"EIP1283F", c.EIP1283FBlock, newcfg.EIP1283FBlock},
 		{"EWASM", c.EWASMBlock, newcfg.EWASMBlock},
 	} {
@@ -730,18 +856,6 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, head *big.Int) *Confi
 	}
 	if c.IsEIP155(head) && !configNumEqual(c.ChainID, newcfg.ChainID) {
 		return newCompatError("EIP155 chain ID", c.EIP155Block, newcfg.EIP155Block)
-	}
-	// Either Byzantium block must be set OR EIP100 and EIP649 must be equivalent
-	if newcfg.ByzantiumBlock == nil {
-		if !configNumEqual(newcfg.EIP100FBlock, newcfg.EIP649FBlock) {
-			return newCompatError("EIP100F/EIP649F not equal", newcfg.EIP100FBlock, newcfg.EIP649FBlock)
-		}
-		if isForkIncompatible(c.EIP100FBlock, newcfg.EIP649FBlock, head) {
-			return newCompatError("EIP100F/EIP649F fork block", c.EIP100FBlock, newcfg.EIP649FBlock)
-		}
-		if isForkIncompatible(c.EIP649FBlock, newcfg.EIP100FBlock, head) {
-			return newCompatError("EIP649F/EIP100F fork block", c.EIP649FBlock, newcfg.EIP100FBlock)
-		}
 	}
 	if isForkIncompatible(c.PetersburgBlock, newcfg.PetersburgBlock, head) {
 		return newCompatError("ConstantinopleFix fork block", c.PetersburgBlock, newcfg.PetersburgBlock)
@@ -824,12 +938,12 @@ type Rules struct {
 	// EIP158HF - Tangerine Whistle
 	IsEIP160F, IsEIP161F, IsEIP170F bool
 	// Byzantium
-	IsEIP100F, IsEIP140F, IsEIP198F, IsEIP211F, IsEIP212F, IsEIP213F, IsEIP214F, IsEIP649F, IsEIP658F bool
+	IsEIP100F, IsEIP140F, IsEIP198F, IsEIP211F, IsEIP212F, IsEIP213F, IsEIP214F, IsEIP658F bool
 	// Constantinople
-	IsEIP145F, IsEIP1014F, IsEIP1052F, IsEIP1283F, IsEIP1234F bool
-	IsPetersburg                                              bool
-	IsBombDisposal, IsSocial, IsEthersocial, IsECIP1010       bool
-	IsMCIP0, IsMCIP3, IsMCIP8                                 bool
+	IsEIP145F, IsEIP1014F, IsEIP1052F, IsEIP1283F bool
+	IsPetersburg                                  bool
+	IsBombDisposal, IsECIP1010                    bool
+	IsMCIP0, IsMCIP3, IsMCIP8                     bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -857,20 +971,16 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsEIP212F: c.IsEIP212F(num),
 		IsEIP213F: c.IsEIP213F(num),
 		IsEIP214F: c.IsEIP214F(num),
-		IsEIP649F: c.IsEIP649F(num),
 		IsEIP658F: c.IsEIP658F(num),
 
 		IsEIP145F:  c.IsEIP145F(num),
 		IsEIP1014F: c.IsEIP1014F(num),
 		IsEIP1052F: c.IsEIP1052F(num),
-		IsEIP1234F: c.IsEIP1234F(num),
 		IsEIP1283F: c.IsEIP1283F(num),
 
 		IsPetersburg: c.IsPetersburg(num),
 
 		IsBombDisposal: c.IsBombDisposal(num),
-		IsSocial:       c.IsSocial(num),
-		IsEthersocial:  c.IsEthersocial(num),
 		IsECIP1010:     c.IsECIP1010(num),
 
 		IsMCIP0: c.IsMCIP0(num),

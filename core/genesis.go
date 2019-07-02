@@ -22,9 +22,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 	"strings"
 
+	xspecparity "github.com/etclabscore/eth-x-chainspec/parity"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -380,6 +382,39 @@ func DefaultGoerliGenesisBlock() *Genesis {
 		Difficulty: big.NewInt(1),
 		Alloc:      decodePrealloc(goerliAllocData),
 	}
+}
+
+func ReadInBootnodesFromParityChainspec(fpath string) ([]string, error) {
+	b, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return nil, err
+	}
+	pc := xspecparity.Config{}
+	err = json.Unmarshal(b, &pc)
+	if err != nil {
+		return nil, err
+	}
+
+	return pc.Nodes, nil
+}
+
+func ReadInGenesisBlockFromParityChainSpec(fpath string) (*Genesis, error) {
+	log.Info("Reading chainspec (parity format)", "filepath", fpath)
+	b, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return nil, err
+	}
+	pc := xspecparity.Config{}
+	err = json.Unmarshal(b, &pc)
+	if err != nil {
+		return nil, err
+	}
+
+	gen := ParityConfigToMultiGethGenesis(&pc)
+	if gen == nil {
+		return gen, errors.New("failure to parse parity chainspec -> go-ethereum genesis")
+	}
+	return gen, nil
 }
 
 // DeveloperGenesisBlock returns the 'geth --dev' genesis block. Note, this must

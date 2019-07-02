@@ -143,6 +143,11 @@ var (
 		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby, 6=Kotti)",
 		Value: eth.DefaultConfig.NetworkId,
 	}
+	ChainspecParityFlag = cli.StringFlag{
+		Name:  "chainspec.parity",
+		Usage: "Read chain configuration from Parity chainspec format",
+		Value: "",
+	}
 	TestnetFlag = cli.BoolFlag{
 		Name:  "testnet",
 		Usage: "Ropsten network: pre-configured proof-of-work test network",
@@ -776,6 +781,15 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(GoerliFlag.Name) {
 			return filepath.Join(path, "goerli")
 		}
+		if ctx.GlobalString(ChainspecParityFlag.Name) != "" {
+			bname := filepath.Base(ctx.GlobalString(ChainspecParityFlag.Name))
+			path = filepath.Join(path, bname)
+			path = strings.TrimSuffix(path, ".json")
+			return path
+			// Want, eg:
+			// ~/.ethereum/kensington/
+		}
+
 		return path
 	}
 	Fatalf("Cannot determine default data directory, please set manually (--datadir)")
@@ -844,6 +858,13 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.KottiBootnodes
 	case ctx.GlobalBool(GoerliFlag.Name):
 		urls = params.GoerliBootnodes
+	case ctx.GlobalString(ChainspecParityFlag.Name) != "":
+		nodes, err := core.ReadInBootnodesFromParityChainspec(ctx.GlobalString(ChainspecParityFlag.Name))
+		if err != nil {
+			Fatalf("%v", err)
+		}
+		urls = nodes
+
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
@@ -1253,6 +1274,13 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "kotti")
 	case ctx.GlobalBool(GoerliFlag.Name):
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
+	case ctx.GlobalString(ChainspecParityFlag.Name) != "":
+		bname := filepath.Base(ctx.GlobalString(ChainspecParityFlag.Name))
+		path := filepath.Join(node.DefaultDataDir(), bname)
+		path = strings.TrimSuffix(path, ".json")
+		cfg.DataDir = path
+		// Want, eg:
+		// ~/.ethereum/kensington/
 	}
 }
 
@@ -1442,7 +1470,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, GoerliFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag, MusicoinFlag)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, RinkebyFlag, KottiFlag, GoerliFlag, ClassicFlag, SocialFlag, MixFlag, EthersocialFlag, MusicoinFlag, ChainspecParityFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	// Can't use both ephemeral unlocked and external signer
@@ -1518,56 +1546,30 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Override any default configs for hard coded networks.
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDTestnet
-		}
 		cfg.Genesis = core.DefaultTestnetGenesisBlock()
 	case ctx.GlobalBool(ClassicFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDClassic
-		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
 	case ctx.GlobalBool(SocialFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDSocial
-		}
 		cfg.Genesis = core.DefaultSocialGenesisBlock()
 	case ctx.GlobalBool(EthersocialFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDEthersocial
-		}
 		cfg.Genesis = core.DefaultEthersocialGenesisBlock()
-
 	case ctx.GlobalBool(MusicoinFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 7762959
-		}
 		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
-
 	case ctx.GlobalBool(RinkebyFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDRinkeby
-		}
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
 	case ctx.GlobalBool(KottiFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDKotti
-		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(MixFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDMix
-		}
 		cfg.Genesis = core.DefaultMixGenesisBlock()
 	case ctx.GlobalBool(GoerliFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDGoerli
-		}
 		cfg.Genesis = core.DefaultGoerliGenesisBlock()
-	case ctx.GlobalBool(DeveloperFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDDeveloper
+	case ctx.GlobalIsSet(ChainspecParityFlag.Name):
+		var err error
+		cfg.Genesis, err = core.ReadInGenesisBlockFromParityChainSpec(ctx.GlobalString(ChainspecParityFlag.Name))
+		if err != nil {
+			Fatalf("failed to read parity chainspec: err=%v", err)
 		}
+	case ctx.GlobalBool(DeveloperFlag.Name):
 		// Create new developer account or reuse existing one
 		var (
 			developer accounts.Account
@@ -1587,9 +1589,15 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		log.Info("Using developer account", "address", developer.Address)
 
 		cfg.Genesis = core.DeveloperGenesisBlock(uint64(ctx.GlobalInt(DeveloperPeriodFlag.Name)), developer.Address)
+
+		cfg.Genesis.Config.NetworkID = params.NetworkIDDeveloper
 		if !ctx.GlobalIsSet(MinerGasPriceFlag.Name) && !ctx.GlobalIsSet(MinerLegacyGasPriceFlag.Name) {
 			cfg.Miner.GasPrice = big.NewInt(1)
 		}
+	}
+
+	if !ctx.GlobalIsSet(NetworkIdFlag.Name) && cfg.Genesis != nil {
+		cfg.NetworkId = cfg.Genesis.Config.NetworkID
 	}
 }
 
@@ -1752,6 +1760,12 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 		genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(GoerliFlag.Name):
 		genesis = core.DefaultGoerliGenesisBlock()
+	case ctx.GlobalIsSet(ChainspecParityFlag.Name):
+		var err error
+		genesis, err = core.ReadInGenesisBlockFromParityChainSpec(ctx.GlobalString(ChainspecParityFlag.Name))
+		if err != nil {
+			Fatalf("failed to read parity chainspec: err=%v", err)
+		}
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}

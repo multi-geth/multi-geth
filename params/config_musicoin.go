@@ -27,6 +27,7 @@ var (
 
 	// MusicoinChainConfig is the chain parameters to run a node on the main network.
 	MusicoinChainConfig = &ChainConfig{
+		NetworkID:      7762959,
 		MCIP0Block:     big.NewInt(0),
 		ChainID:        big.NewInt(7762959),
 		HomesteadBlock: big.NewInt(1150000),
@@ -40,6 +41,14 @@ var (
 		MCIP3Block:     big.NewInt(1200001),
 		MCIP8Block:     big.NewInt(5200001),
 		Ethash:         new(EthashConfig),
+		BlockRewardSchedule: BlockRewardScheduleT{
+			big.NewInt(0):       new(big.Int).Mul(big.NewInt(314), big.NewInt(1e+18)),
+			big.NewInt(1200001): new(big.Int).Mul(big.NewInt(250), big.NewInt(1e+18)),
+			big.NewInt(5200001): new(big.Int).Mul(big.NewInt(50), big.NewInt(1e+18)),
+		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			big.NewInt(2222222): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+		},
 	}
 
 	MusicoinTimeCapsuleBlock  = int64(4200000)

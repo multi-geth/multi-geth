@@ -17,12 +17,26 @@
 package params
 
 import (
+	"encoding/json"
 	"math/big"
 	"reflect"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 )
+
+func TestMarshalingJSON(t *testing.T) {
+	c := TestChainConfig
+	b, err := json.MarshalIndent(c, "", "    ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c2 := ChainConfig{}
+	err = json.Unmarshal(b, &c2)
+	if err != nil {
+		t.Fatal(err, string(b))
+	}
+}
 
 func TestCheckCompatible(t *testing.T) {
 	type test struct {
@@ -73,17 +87,6 @@ func TestCheckCompatible(t *testing.T) {
 			},
 		},
 		{
-			stored: &ChainConfig{EIP100FBlock: big.NewInt(30), EIP649FBlock: big.NewInt(31)},
-			new:    &ChainConfig{EIP100FBlock: big.NewInt(30), EIP649FBlock: big.NewInt(31)},
-			head:   25,
-			wantErr: &ConfigCompatError{
-				What:         "EIP100F/EIP649F not equal",
-				StoredConfig: big.NewInt(30),
-				NewConfig:    big.NewInt(31),
-				RewindTo:     29,
-			},
-		},
-		{
 			stored: &ChainConfig{EIP100FBlock: big.NewInt(30), EIP649FBlock: big.NewInt(30)},
 			new:    &ChainConfig{EIP100FBlock: big.NewInt(24), EIP649FBlock: big.NewInt(24)},
 			head:   25,
@@ -99,17 +102,6 @@ func TestCheckCompatible(t *testing.T) {
 			new:     &ChainConfig{EIP211FBlock: big.NewInt(26)},
 			head:    25,
 			wantErr: nil,
-		},
-		{
-			stored: &ChainConfig{ByzantiumBlock: big.NewInt(30)},
-			new:    &ChainConfig{EIP100FBlock: big.NewInt(26)}, // err: EIP649 must also be set
-			head:   25,
-			wantErr: &ConfigCompatError{
-				What:         "EIP100F/EIP649F not equal",
-				StoredConfig: big.NewInt(26), // this yields a weird-looking error (correctly, though), b/c ConfigCompatError not set up for these kinds of strange cases
-				NewConfig:    nil,
-				RewindTo:     25,
-			},
 		},
 		{
 			stored:  &ChainConfig{ByzantiumBlock: big.NewInt(30)},

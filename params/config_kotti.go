@@ -27,6 +27,7 @@ var (
 
 	// KottiChainConfig is the chain parameters to run a node on the Kotti main network.
 	KottiChainConfig = &ChainConfig{
+		NetworkID:           6,
 		ChainID:             big.NewInt(6),
 		HomesteadBlock:      big.NewInt(0),
 		DAOForkBlock:        nil,
@@ -37,8 +38,6 @@ var (
 		EIP158Block:         big.NewInt(716617),
 		ByzantiumBlock:      big.NewInt(716617),
 		DisposalBlock:       big.NewInt(0),
-		SocialBlock:         nil,
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160FBlock:        big.NewInt(0),

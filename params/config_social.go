@@ -27,6 +27,7 @@ var (
 
 	// SocialChainConfig is the chain parameters to run a node on the Ethereum Social main network.
 	SocialChainConfig = &ChainConfig{
+		NetworkID:           28,
 		ChainID:             big.NewInt(28),
 		HomesteadBlock:      big.NewInt(0),
 		DAOForkBlock:        nil,
@@ -37,17 +38,12 @@ var (
 		EIP158Block:         nil,
 		ByzantiumBlock:      nil,
 		DisposalBlock:       big.NewInt(0),
-		SocialBlock:         big.NewInt(0),
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160FBlock:        big.NewInt(0),
 		Ethash:              new(EthashConfig),
+		BlockRewardSchedule: BlockRewardScheduleT{
+			big.NewInt(0): new(big.Int).Mul(big.NewInt(50), big.NewInt(1e+18)),
+		},
 	}
-
-	SocialBlockReward = new(big.Int).Mul(big.NewInt(50), big.NewInt(1e+18)) // Block reward in wei for successfully mining a block upward for Ethereum Social
 )
-
-func (c *ChainConfig) IsSocial(num *big.Int) bool {
-	return isForked(c.SocialBlock, num)
-}

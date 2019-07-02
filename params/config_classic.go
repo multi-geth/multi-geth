@@ -24,6 +24,7 @@ import (
 var (
 	// ClassicChainConfig is the chain parameters to run a node on the Classic main network.
 	ClassicChainConfig = &ChainConfig{
+		NetworkID:           1,
 		ChainID:             big.NewInt(61),
 		HomesteadBlock:      big.NewInt(1150000),
 		DAOForkBlock:        big.NewInt(1920000),
@@ -34,8 +35,6 @@ var (
 		EIP158Block:         big.NewInt(8772000),
 		ByzantiumBlock:      big.NewInt(8772000),
 		DisposalBlock:       big.NewInt(5900000),
-		SocialBlock:         nil,
-		EthersocialBlock:    nil,
 		ConstantinopleBlock: nil,
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160FBlock:        big.NewInt(3000000),

@@ -93,6 +93,18 @@
 			"revisionTime": "2018-01-22T22:25:45Z"
 		},
 		{
+			"checksumSHA1": "PoAzwKn7Tmw/U5cgjMEjb/Qen5A=",
+			"path": "github.com/etclabscore/eth-x-chainspec",
+			"revision": "997c9e3b4d0f9ad102265477454b39650c41bcd5",
+			"revisionTime": "2019-06-11T20:28:03Z"
+		},
+		{
+			"checksumSHA1": "ypYheuLKlmFPOlGD+0/N96j1EnU=",
+			"path": "github.com/etclabscore/eth-x-chainspec/parity",
+			"revision": "233cbabf705e3dd9d4c93c6ff7b0121ea6071ee1",
+			"revisionTime": "2019-06-10T14:16:03Z"
+		},
+		{
 			"checksumSHA1": "7oFpbmDfGobwKsFLIf6wMUvVoKw=",
 			"path": "github.com/fatih/color",
 			"revision": "5ec5d9d3c2cf82e9688b34e9bc27a94d616a7193",
@@ -133,6 +145,12 @@
 			"path": "github.com/go-stack/stack",
 			"revision": "54be5f394ed2c3e19dac9134a40a95ba5a017f7b",
 			"revisionTime": "2017-07-10T16:04:46Z"
+		},
+		{
+			"checksumSHA1": "at1y9um6fBwntQTOsP5eCFDqNfA=",
+			"path": "github.com/go-test/deep",
+			"revision": "042da051cf3189d80f667339b822c7effac29cd6",
+			"revisionTime": "2018-11-18T22:09:53Z"
 		},
 		{
 			"checksumSHA1": "CGj8VcI/CpzxaNqlqpEVM7qElD4=",

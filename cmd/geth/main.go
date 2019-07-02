@@ -134,6 +134,7 @@ var (
 		utils.NodeKeyHexFlag,
 		utils.DeveloperFlag,
 		utils.DeveloperPeriodFlag,
+		utils.ChainspecParityFlag,
 		utils.TestnetFlag,
 		utils.ClassicFlag,
 		utils.SocialFlag,

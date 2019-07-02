@@ -27,6 +27,7 @@ var (
 
 	// EthersocialChainConfig is the chain parameters to run a node on the Ethersocial main network.
 	EthersocialChainConfig = &ChainConfig{
+		NetworkID:           1,
 		ChainID:             big.NewInt(31102),
 		HomesteadBlock:      big.NewInt(0),
 		DAOForkBlock:        big.NewInt(0),
@@ -37,15 +38,13 @@ var (
 		EIP158Block:         big.NewInt(845000),
 		ByzantiumBlock:      big.NewInt(600000),
 		DisposalBlock:       nil,
-		SocialBlock:         nil,
-		EthersocialBlock:    big.NewInt(0),
 		ConstantinopleBlock: nil,
 		Ethash:              new(EthashConfig),
+		BlockRewardSchedule: BlockRewardScheduleT{
+			big.NewInt(0): big.NewInt(5e+18),
+		},
+		DifficultyBombDelays: DifficultyBombDelaysT{
+			big.NewInt(600000): new(big.Int).SetUint64(uint64(0x2dc6c0)),
+		},
 	}
-
-	EthersocialBlockReward = big.NewInt(5e+18) // Block reward in wei for successfully mining a block upward for Ethersocial Network
 )
-
-func (c *ChainConfig) IsEthersocial(num *big.Int) bool {
-	return isForked(c.EthersocialBlock, num)
-}
