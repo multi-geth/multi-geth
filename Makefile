@@ -10,6 +10,7 @@
 
 GOBIN = $(shell pwd)/build/bin
 GO ?= latest
+export SVM ?= false
 
 geth:
 	build/env.sh go run build/ci.go install ./cmd/geth
@@ -36,6 +37,9 @@ lint: ## Run linters.
 	build/env.sh go run build/ci.go lint
 
 clean:
+ifeq (${SVM}, true)
+	./build/clean_evm-rs.sh;
+endif
 	./build/clean_go_build_cache.sh
 	rm -fr build/_workspace/pkg/ $(GOBIN)/*
 

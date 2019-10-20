@@ -93,6 +93,13 @@
 			"revisionTime": "2018-01-22T22:25:45Z"
 		},
 		{
+			"checksumSHA1": "AACVGZV8cKEM7hRK79LIiS050nc=",
+			"path": "github.com/ethereumproject/evm-ffi",
+			"revision": "bd78c6529da8080ba4b906742ff9fce858145cf7",
+			"revisionTime": "2019-05-15T12:16:31Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "7oFpbmDfGobwKsFLIf6wMUvVoKw=",
 			"path": "github.com/fatih/color",
 			"revision": "5ec5d9d3c2cf82e9688b34e9bc27a94d616a7193",

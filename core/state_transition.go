@@ -197,7 +197,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	if err = st.useGas(gas); err != nil {
 		return nil, 0, false, err
 	}
-
 	var (
 		evm = st.evm
 		// vm errors do not effect consensus and are therefor
@@ -223,7 +222,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	}
 	st.refundGas()
 	st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
-
 	return ret, st.gasUsed(), vmerr != nil, err
 }
 

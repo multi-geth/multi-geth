@@ -44,6 +44,7 @@ type Environment struct {
 	Buildnum                  string
 	IsPullRequest             bool
 	IsCronJob                 bool
+	WithSVM                   bool
 }
 
 func (env Environment) String() string {
@@ -70,6 +71,7 @@ func Env() Environment {
 			Buildnum:      os.Getenv("TRAVIS_BUILD_NUMBER"),
 			IsPullRequest: os.Getenv("TRAVIS_PULL_REQUEST") != "false",
 			IsCronJob:     os.Getenv("TRAVIS_EVENT_TYPE") == "cron",
+			WithSVM:       os.Getenv("SVM") == "true",
 		}
 	case os.Getenv("CI") == "True" && os.Getenv("APPVEYOR") == "True":
 		commit := os.Getenv("APPVEYOR_PULL_REQUEST_HEAD_COMMIT")
@@ -86,6 +88,7 @@ func Env() Environment {
 			Buildnum:      os.Getenv("APPVEYOR_BUILD_NUMBER"),
 			IsPullRequest: os.Getenv("APPVEYOR_PULL_REQUEST_NUMBER") != "",
 			IsCronJob:     os.Getenv("APPVEYOR_SCHEDULED_BUILD") == "True",
+			WithSVM:       os.Getenv("SVM") == "true",
 		}
 	default:
 		return LocalEnv()
@@ -95,7 +98,7 @@ func Env() Environment {
 // LocalEnv returns build environment metadata gathered from git.
 func LocalEnv() Environment {
 	env := applyEnvFlags(Environment{Name: "local", Repo: "ethereum/go-ethereum"})
-
+	env.WithSVM = os.Getenv("SVM") == "true"
 	head := readGitFile("HEAD")
 	if fields := strings.Fields(head); len(fields) == 2 {
 		head = fields[1]

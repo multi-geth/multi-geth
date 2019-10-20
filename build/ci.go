@@ -262,6 +262,7 @@ func buildFlags(env build.Environment) (flags []string) {
 		ld = append(ld, "-X", "main.gitCommit="+env.Commit)
 		ld = append(ld, "-X", "main.gitDate="+env.Date)
 	}
+
 	if runtime.GOOS == "darwin" {
 		ld = append(ld, "-s")
 	}
@@ -269,6 +270,11 @@ func buildFlags(env build.Environment) (flags []string) {
 	if len(ld) > 0 {
 		flags = append(flags, "-ldflags", strings.Join(ld, " "))
 	}
+
+	if env.WithSVM {
+		flags = append(flags, "--tags", "sputnikvm")
+	}
+
 	return flags
 }
 

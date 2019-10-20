@@ -758,7 +758,7 @@ var (
 	}
 	EVMInterpreterFlag = cli.StringFlag{
 		Name:  "vm.evm",
-		Usage: "External EVM configuration (default = built-in interpreter)",
+		Usage: "External EVM configuration (default = built-in interpreter, optionally: =svm)",
 		Value: "",
 	}
 )
@@ -1520,6 +1520,9 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	}
 
 	if ctx.GlobalIsSet(EVMInterpreterFlag.Name) {
+		if !core.IsSputnikvmEnabled {
+			Fatalf("Geth was not built with SputnikVM/EVM-RS support, please rebuild with SVM=true")
+		}
 		cfg.EVMInterpreter = ctx.GlobalString(EVMInterpreterFlag.Name)
 	}
 	if ctx.GlobalIsSet(RPCGlobalGasCap.Name) {
