@@ -38,6 +38,8 @@ var (
 		EthersocialBlock:    nil,
 		ConstantinopleBlock: big.NewInt(9573000),
 		PetersburgBlock:     big.NewInt(9573000),
+		IstanbulBlock:       big.NewInt(10500839),
+		EIP1884DisableFBlock:big.NewInt(10500839),
 		ECIP1017EraRounds:   big.NewInt(5000000),
 		EIP160FBlock:        big.NewInt(3000000),
 		ECIP1010PauseBlock:  big.NewInt(3000000),
