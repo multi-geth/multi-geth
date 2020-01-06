@@ -366,6 +366,15 @@ func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Heade
 	if config.IsBombDisposal(next) {
 		return out
 
+	} else if config.IsEIP2384F(next) {
+
+		// Muir Glacier
+		fakeBlockNumber := new(big.Int)
+		if parent.Number.Cmp(big.NewInt(8999999)) >= 0 {
+			fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big.NewInt(8999999))
+		}
+		exPeriodRef.Set(fakeBlockNumber)
+
 	} else if config.IsEIP1234F(next) {
 		// calcDifficultyEIP1234 is the difficulty adjustment algorithm for Constantinople.
 		// The calculation uses the Byzantium rules, but with bomb offset 5M.

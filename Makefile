@@ -16,11 +16,6 @@ geth:
 	@echo "Done building."
 	@echo "Run \"$(GOBIN)/geth\" to launch geth."
 
-swarm:
-	go run build/ci.go install ./cmd/swarm
-	@echo "Done building."
-	@echo "Run \"$(GOBIN)/swarm\" to launch swarm."
-
 all:
 	go run build/ci.go install
 
@@ -41,8 +36,8 @@ lint: ## Run linters.
 	go run build/ci.go lint
 
 clean:
-	./build/clean_go_build_cache.sh
-	rm -fr $(GOBIN)/*
+	go clean -cache
+	rm -fr build/_workspace/pkg/ $(GOBIN)/*
 
 # The devtools target installs tools required for 'go generate'.
 # You need to put $GOBIN (or $GOPATH/bin) in your PATH to use 'go generate'.
