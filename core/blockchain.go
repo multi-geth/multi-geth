@@ -1509,7 +1509,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 		musicoinErrChain := bc.checkChainForAttack(chain)
 		if musicoinErrChain != nil {
 			log.Error("musicoin rat(s) discovered", "error", musicoinErrChain.Error())
-			return 0, events, coalescedLogs, musicoinErrChain
+			return 0, musicoinErrChain
 		}
 	}
 
