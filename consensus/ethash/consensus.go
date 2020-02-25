@@ -314,10 +314,12 @@ func (ethash *Ethash) CalcDifficulty(chain consensus.ChainReader, time uint64, p
 // the difficulty that a new block should have when created at time
 // given the parent block's time and difficulty.
 func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
+	if config.HasGenericDifficulty() {
+		return calcDifficultyGeneric(config, time, parent)
+	}
+
 	next := new(big.Int).Add(parent.Number, big1)
 	switch {
-	case config.HasGenericDifficulty():
-		return calcDifficultyGeneric(config, time, parent)
 	case config.IsMuirGlacier(next):
 		return calcDifficultyEip2384(time, parent)
 	case config.IsConstantinople(next):

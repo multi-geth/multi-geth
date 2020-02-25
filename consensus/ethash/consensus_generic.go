@@ -29,7 +29,7 @@ func parentTimeDelta(t uint64, p *types.Header) *big.Int {
 	return new(big.Int).Sub(new(big.Int).SetUint64(t), new(big.Int).SetUint64(p.Time))
 }
 
-// parent_diff_over_dbd is a  convenience fn for CalcDifficulty
+// parent_diff_over_dbd is a convenience fn for CalcDifficulty
 func parentDiffOverDbd(p *types.Header) *big.Int {
 	return new(big.Int).Div(p.Difficulty, params.DifficultyBoundDivisor)
 }
