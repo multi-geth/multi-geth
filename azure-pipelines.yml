@@ -16,13 +16,13 @@ jobs:
       command: 'get'
       arguments: '-d'
       workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName 'Get packages'
+    displayName: 'Get packages'
   - task: Go@0
     inputs:
       command: 'test'
       arguments: '-v'
       workingDirectory: '$(modulePath)'
-    displayName 'Test packages'
+    displayName: 'Test packages'
   - script: make all
     displayName: 'Build artifacts'
   - task: ArchiveFiles@2
