@@ -156,8 +156,8 @@ public class AndroidTest extends InstrumentationTestCase {
 // This method has been adapted from golang.org/x/mobile/bind/java/seq_test.go/runTest
 func TestAndroid(t *testing.T) {
 	// Skip this test if `SKIP_ANDROID` is set.
-	if os.Getenv("SKIP_ANDROID_TEST") != "" {
-		t.Skip("SKIP_ANDROID_TEST flag set, skipping")
+	if os.Getenv("SKIP_TEST_ANDROID") != "" {
+		t.Skip("SKIP_TEST_ANDROID flag set, skipping")
 	}
 	// Skip tests on Windows altogether
 	if runtime.GOOS == "windows" {
