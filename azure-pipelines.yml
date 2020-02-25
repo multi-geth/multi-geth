@@ -7,6 +7,8 @@ jobs:
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 0
+  variables:
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath'
   steps:
   - task: GoTool@0
     inputs:
