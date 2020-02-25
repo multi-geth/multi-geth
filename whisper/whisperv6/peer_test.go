@@ -17,6 +17,7 @@
 package whisperv6
 
 import (
+	"os"
 	"bytes"
 	"crypto/ecdsa"
 	"fmt"
