@@ -15,7 +15,6 @@ jobs:
       version: '1.13.5'
   - script: |
       export PATH=$PATH:$GOPATH/bin
-      echo "Current path $PATH"
       make test
     displayName: 'Run tests'
   - script: make all
