@@ -1,0 +1,87 @@
+trigger:
+- master
+- refs/tags/*
+
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 0
+  steps:
+  - task: GoTool@0
+    inputs:
+      version: '1.13.5'
+  - script: make test
+    displayName: 'Run tests'
+  - script: make all
+    displayName: 'Build artifacts'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'build/bin/geth'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-linux.zip'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'build/bin'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip'
+  - script: |
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip.sha256
+    displayName: 'Finalize artifacts'
+
+- job: MacOS
+  pool:
+    vmImage: 'macOS-latest'
+  timeoutInMinutes: 0
+  steps:
+  - task: GoTool@0
+    inputs:
+      version: '1.13.5'
+  - script: make all
+    displayName: 'Build artifacts'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'build/bin/geth'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-linux.zip'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'build/bin'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip'
+  - script: |
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip.sha256
+    displayName: 'Finalize artifacts'
+
+- job: Windows
+  pool:
+    vmImage: 'windows-latest'
+  timeoutInMinutes: 0
+  steps:
+  - task: GoTool@0
+    inputs:
+      version: '1.13.5'
+  - script: make all
+    displayName: 'Build artifacts'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'build/bin/geth'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-linux.zip'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'build/bin'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip'
+  - script: |
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip.sha256
+    displayName: 'Finalize artifacts'
