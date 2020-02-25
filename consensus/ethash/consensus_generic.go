@@ -17,7 +17,6 @@
 package ethash
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/math"
