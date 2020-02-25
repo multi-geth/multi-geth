@@ -1564,25 +1564,25 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.GoerliGenesisHash])
 	case ctx.GlobalBool(ClassicFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDClassic
+			cfg.NetworkId = 1
 		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
 		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.ClassicGenesisHash])
 	case ctx.GlobalBool(MordorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDMordor
+			cfg.NetworkId = 7
 		}
 		cfg.Genesis = core.DefaultMordorGenesisBlock()
 		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MordorGenesisHash])
 	case ctx.GlobalBool(KottiFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDKotti
+			cfg.NetworkId = 6
 		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
 		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.KottiGenesisHash])
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDMusicoin
+			cfg.NetworkId = 7762959
 		}
 		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
 		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MusicoinGenesisHash])

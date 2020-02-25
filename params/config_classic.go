@@ -22,6 +22,9 @@ import (
 )
 
 var (
+	// Genesis hashes to enforce below configs on.
+	ClassicGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
+
 	// ClassicChainConfig is the chain parameters to run a node on the Classic main network.
 	ClassicChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(61),

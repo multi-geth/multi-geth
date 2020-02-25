@@ -24,11 +24,11 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 )
 
-func accumulateMCIP0FRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+func accumulateMCIP0Rewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	// Select the correct block reward based on chain progression
-	blockReward := params.MCIP0FBlockReward
-	mcip3Reward := params.MCIP3FBlockReward
-	mcip8Reward := params.MCIP8FBlockReward
+	blockReward := params.MCIP0BlockReward
+	mcip3Reward := params.MCIP3BlockReward
+	mcip8Reward := params.MCIP8BlockReward
 	ubiReservoir := params.MusicoinUbiBlockReward
 	devReservoir := params.MusicoinDevBlockReward
 

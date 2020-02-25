@@ -17,48 +17,27 @@
 package ethash
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
 	"math/big"
-	"runtime"
-	"time"
 
-	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"golang.org/x/crypto/sha3"
-)
-
-// Ethash proof-of-work protocol constants.
-var (
-	FrontierBlockReward    = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
-	EIP649FBlockReward     = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
-	EIP1234FBlockReward    = big.NewInt(2e+18) // Block reward in wei for successfully mining a block upward from Constantinople
-	maxUncles              = 2                 // Maximum number of uncles allowed in a single block
-	allowedFutureBlockTime = 15 * time.Second  // Max time from current time allowed for blocks, before they're considered future blocks
 )
 
 // parent_time_delta is a convenience fn for CalcDifficulty
-func parent_time_delta(t uint64, p *types.Header) *big.Int {
+func parentTimeDelta(t uint64, p *types.Header) *big.Int {
 	return new(big.Int).Sub(new(big.Int).SetUint64(t), new(big.Int).SetUint64(p.Time))
 }
 
 // parent_diff_over_dbd is a  convenience fn for CalcDifficulty
-func parent_diff_over_dbd(p *types.Header) *big.Int {
+func parentDiffOverDbd(p *types.Header) *big.Int {
 	return new(big.Int).Div(p.Difficulty, params.DifficultyBoundDivisor)
 }
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns
 // the difficulty that a new block should have when created at time
 // given the parent block's time and difficulty.
-func CalcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
+func calcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
 	next := new(big.Int).Add(parent.Number, big1)
 	out := new(big.Int)
 
@@ -69,7 +48,7 @@ func CalcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *type
 		// diff = (parent_diff +
 		//         (parent_diff / 2048 * max((2 if len(parent.uncles) else 1) - ((timestamp - parent.timestamp) // 9), -99))
 		//        ) + 2^(periodCount - 2)
-		out.Div(parent_time_delta(time, parent), big9)
+		out.Div(parentTimeDelta(time, parent), big9)
 
 		if parent.UncleHash == types.EmptyUncleHash {
 			out.Sub(big1, out)
@@ -77,7 +56,7 @@ func CalcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *type
 			out.Sub(big2, out)
 		}
 		out.Set(math.BigMax(out, bigMinus99))
-		out.Mul(parent_diff_over_dbd(parent), out)
+		out.Mul(parentDiffOverDbd(parent), out)
 		out.Add(out, parent.Difficulty)
 
 	} else if config.IsHomestead(next) {
@@ -86,10 +65,10 @@ func CalcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *type
 		// diff = (parent_diff +
 		//         (parent_diff / 2048 * max(1 - (block_timestamp - parent_timestamp) // 10, -99))
 		//        )
-		out.Div(parent_time_delta(time, parent), big10)
+		out.Div(parentTimeDelta(time, parent), big10)
 		out.Sub(big1, out)
 		out.Set(math.BigMax(out, bigMinus99))
-		out.Mul(parent_diff_over_dbd(parent), out)
+		out.Mul(parentDiffOverDbd(parent), out)
 		out.Add(out, parent.Difficulty)
 
 	} else {
@@ -101,10 +80,10 @@ func CalcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *type
 		//   else
 		//      parent_diff - (parent_diff // 2048)
 		out.Set(parent.Difficulty)
-		if parent_time_delta(time, parent).Cmp(params.DurationLimit) < 0 {
-			out.Add(out, parent_diff_over_dbd(parent))
+		if parentTimeDelta(time, parent).Cmp(params.DurationLimit) < 0 {
+			out.Add(out, parentDiffOverDbd(parent))
 		} else {
-			out.Sub(out, parent_diff_over_dbd(parent))
+			out.Sub(out, parentDiffOverDbd(parent))
 		}
 	}
 
@@ -116,9 +95,9 @@ func CalcDifficultyGeneric(config *params.ChainConfig, time uint64, parent *type
 	// exPeriodRef the explosion clause's reference point
 	exPeriodRef := new(big.Int).Add(parent.Number, big1)
 
-	if config.IsBombDisposalF(next) {
+	if config.IsBombDisposal(next) {
 		return out
-	} else if config.IsECIP1010F(next) {
+	} else if config.IsECIP1010(next) {
 		ecip1010Explosion(config, next, exPeriodRef)
 	}
 

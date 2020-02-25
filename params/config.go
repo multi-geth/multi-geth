@@ -531,6 +531,11 @@ func (c *ChainConfig) HasECIP1017() bool {
 	}
 }
 
+// Check whether the generic difficulty function should be used.
+func (c *ChainConfig) HasGenericDifficulty() bool {
+	return c.HasECIP1017()
+}
+
 // IsEIP160F returns whether num is either equal to or greater than the "EIP158HF" Block or EIP160 block.
 func (c *ChainConfig) IsEIP160(num *big.Int) bool {
 	return isForked(c.EIP158Block, num) || isForked(c.EIP160Block, num)
@@ -726,7 +731,7 @@ func (c *ChainConfig) Rules(num *big.Int) Rules {
 		IsConstantinople: c.IsConstantinople(num),
 		IsPetersburg:     c.IsPetersburg(num),
 		IsIstanbul:       c.IsIstanbul(num),
-		HasECIP1017:      c.HasECIP1017(num),
+		HasECIP1017:      c.HasECIP1017(),
 		IsEIP160:         c.IsEIP160(num),
 		IsBombDisposal:   c.IsBombDisposal(num),
 		IsECIP1010:       c.IsECIP1010(num),

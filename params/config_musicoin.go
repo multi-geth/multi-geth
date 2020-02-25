@@ -45,9 +45,9 @@ var (
 	MusicoinTimeCapsuleBlock  = int64(4200000)
 	MusicoinTimeCapsuleLength = uint64(50) // Threshold of blocks that can be delayed and the value is in Blocks
 
-	Mcip0BlockReward       = new(big.Int).Mul(big.NewInt(314), big.NewInt(1e+18)) // In musicoin code as 'FrontierBlockReward'
-	Mcip3BlockReward       = new(big.Int).Mul(big.NewInt(250), big.NewInt(1e+18))
-	Mcip8BlockReward       = new(big.Int).Mul(big.NewInt(50), big.NewInt(1e+18))
+	MCIP0BlockReward       = new(big.Int).Mul(big.NewInt(314), big.NewInt(1e+18)) // In musicoin code as 'FrontierBlockReward'
+	MCIP3BlockReward       = new(big.Int).Mul(big.NewInt(250), big.NewInt(1e+18))
+	MCIP8BlockReward       = new(big.Int).Mul(big.NewInt(50), big.NewInt(1e+18))
 	MusicoinUbiBlockReward = new(big.Int).Mul(big.NewInt(50), big.NewInt(1e+18))
 	MusicoinDevBlockReward = new(big.Int).Mul(big.NewInt(14), big.NewInt(1e+18))
 )

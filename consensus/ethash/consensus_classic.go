@@ -18,25 +18,26 @@ package ethash
 import (
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 )
 
-func accumulateEcip1017FRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+func accumulateECIP1017Rewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
 	blockReward := FrontierBlockReward
 
 	// Ensure value 'era' is configured.
 	eraLen := config.ECIP1017EraRounds
-	era := GetBlockEra(header.Number, eraLen)
-	wr := GetBlockWinnerRewardByEra(era, blockReward)                    // wr "winner reward". 5, 4, 3.2, 2.56, ...
-	wurs := GetBlockWinnerRewardForUnclesByEra(era, uncles, blockReward) // wurs "winner uncle rewards"
+	era := getBlockEra(header.Number, eraLen)
+	wr := getBlockWinnerRewardByEra(era, blockReward)                    // wr "winner reward". 5, 4, 3.2, 2.56, ...
+	wurs := getBlockWinnerRewardForUnclesByEra(era, uncles, blockReward) // wurs "winner uncle rewards"
 	wr.Add(wr, wurs)
 	state.AddBalance(header.Coinbase, wr) // $$
 
 	// Reward uncle miners.
 	for _, uncle := range uncles {
-		ur := GetBlockUncleRewardByEra(era, header, uncle, blockReward)
+		ur := getBlockUncleRewardByEra(era, header, uncle, blockReward)
 		state.AddBalance(uncle.Coinbase, ur) // $$
 	}
 }
@@ -54,7 +55,7 @@ func ecip1010Explosion(config *params.ChainConfig, next *big.Int, exPeriodRef *b
 
 // GetBlockEra gets which "Era" a given block is within, given an era length (ecip-1017 has era=5,000,000 blocks)
 // Returns a zero-index era number, so "Era 1": 0, "Era 2": 1, "Era 3": 2 ...
-func blockEra(blockNum, eraLength *big.Int) *big.Int {
+func getBlockEra(blockNum, eraLength *big.Int) *big.Int {
 	// If genesis block or impossible negative-numbered block, return zero-val.
 	if blockNum.Sign() < 1 {
 		return new(big.Int)
@@ -69,18 +70,72 @@ func blockEra(blockNum, eraLength *big.Int) *big.Int {
 	return new(big.Int).Sub(d, dremainder)
 }
 
+// As of "Era 2" (zero-index era 1), uncle miners and winners are rewarded equally for each included block.
+// So they share this function.
+func getEraUncleBlockReward(era *big.Int, blockReward *big.Int) *big.Int {
+	return new(big.Int).Div(getBlockWinnerRewardByEra(era, blockReward), big32)
+}
+
+// GetBlockUncleRewardByEra gets called _for each uncle miner_ associated with a winner block's uncles.
+func getBlockUncleRewardByEra(era *big.Int, header, uncle *types.Header, blockReward *big.Int) *big.Int {
+	// Era 1 (index 0):
+	//   An extra reward to the winning miner for including uncles as part of the block, in the form of an extra 1/32 (0.15625ETC) per uncle included, up to a maximum of two (2) uncles.
+	if era.Cmp(big.NewInt(0)) == 0 {
+		r := new(big.Int)
+		r.Add(uncle.Number, big8) // 2,534,998 + 8              = 2,535,006
+		r.Sub(r, header.Number)   // 2,535,006 - 2,534,999        = 7
+		r.Mul(r, blockReward)     // 7 * 5e+18               = 35e+18
+		r.Div(r, big8)            // 35e+18 / 8                            = 7/8 * 5e+18
+
+		return r
+	}
+	return getEraUncleBlockReward(era, blockReward)
+}
+
+// GetBlockWinnerRewardForUnclesByEra gets called _per winner_, and accumulates rewards for each included uncle.
+// Assumes uncles have been validated and limited (@ func (v *BlockValidator) VerifyUncles).
+func getBlockWinnerRewardForUnclesByEra(era *big.Int, uncles []*types.Header, blockReward *big.Int) *big.Int {
+	r := big.NewInt(0)
+
+	for range uncles {
+		r.Add(r, getEraUncleBlockReward(era, blockReward)) // can reuse this, since 1/32 for winner's uncles remain unchanged from "Era 1"
+	}
+	return r
+}
+
+// GetRewardByEra gets a block reward at disinflation rate.
+// Constants MaxBlockReward, DisinflationRateQuotient, and DisinflationRateDivisor assumed.
+func getBlockWinnerRewardByEra(era *big.Int, blockReward *big.Int) *big.Int {
+	if era.Cmp(big.NewInt(0)) == 0 {
+		return new(big.Int).Set(blockReward)
+	}
+
+	// MaxBlockReward _r_ * (4/5)**era == MaxBlockReward * (4**era) / (5**era)
+	// since (q/d)**n == q**n / d**n
+	// qed
+	var q, d, r *big.Int = new(big.Int), new(big.Int), new(big.Int)
+
+	q.Exp(params.DisinflationRateQuotient, era, nil)
+	d.Exp(params.DisinflationRateDivisor, era, nil)
+
+	r.Mul(blockReward, q)
+	r.Div(r, d)
+
+	return r
+}
+
 func calcDifficultyClassic(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
 	next := new(big.Int).Add(parent.Number, big1)
 	out := new(big.Int)
 
 	// ADJUSTMENT algorithms
-	if config.IsByan(next) {
+	if config.IsByzantium(next) {
 		// https://github.com/ethereum/EIPs/issues/100
 		// algorithm:
 		// diff = (parent_diff +
 		//         (parent_diff / 2048 * max((2 if len(parent.uncles) else 1) - ((timestamp - parent.timestamp) // 9), -99))
 		//        ) + 2^(periodCount - 2)
-		out.Div(parent_time_delta(time, parent), big9)
+		out.Div(parentTimeDelta(time, parent), big9)
 
 		if parent.UncleHash == types.EmptyUncleHash {
 			out.Sub(big1, out)
@@ -88,19 +143,19 @@ func calcDifficultyClassic(config *params.ChainConfig, time uint64, parent *type
 			out.Sub(big2, out)
 		}
 		out.Set(math.BigMax(out, bigMinus99))
-		out.Mul(parent_diff_over_dbd(parent), out)
+		out.Mul(parentDiffOverDbd(parent), out)
 		out.Add(out, parent.Difficulty)
 
-	} else if config.IsEIP2F(next) {
+	} else if config.IsHomestead(next) {
 		// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 		// algorithm:
 		// diff = (parent_diff +
 		//         (parent_diff / 2048 * max(1 - (block_timestamp - parent_timestamp) // 10, -99))
 		//        )
-		out.Div(parent_time_delta(time, parent), big10)
+		out.Div(parentTimeDelta(time, parent), big10)
 		out.Sub(big1, out)
 		out.Set(math.BigMax(out, bigMinus99))
-		out.Mul(parent_diff_over_dbd(parent), out)
+		out.Mul(parentDiffOverDbd(parent), out)
 		out.Add(out, parent.Difficulty)
 
 	} else {
@@ -112,10 +167,10 @@ func calcDifficultyClassic(config *params.ChainConfig, time uint64, parent *type
 		//   else
 		//      parent_diff - (parent_diff // 2048)
 		out.Set(parent.Difficulty)
-		if parent_time_delta(time, parent).Cmp(params.DurationLimit) < 0 {
-			out.Add(out, parent_diff_over_dbd(parent))
+		if parentTimeDelta(time, parent).Cmp(params.DurationLimit) < 0 {
+			out.Add(out, parentDiffOverDbd(parent))
 		} else {
-			out.Sub(out, parent_diff_over_dbd(parent))
+			out.Sub(out, parentDiffOverDbd(parent))
 		}
 	}
 
@@ -129,35 +184,6 @@ func calcDifficultyClassic(config *params.ChainConfig, time uint64, parent *type
 
 	if config.IsBombDisposal(next) {
 		return out
-
-	} else if config.IsEIP1234F(next) {
-		// calcDifficultyEIP1234 is the difficulty adjustment algorithm for Constantinople.
-		// The calculation uses the Byzantium rules, but with bomb offset 5M.
-		// Specification EIP-1234: https://eips.ethereum.org/EIPS/eip-1234
-		// Note, the calculations below looks at the parent number, which is 1 below
-		// the block number. Thus we remove one from the delay given
-
-		// calculate a fake block number for the ice-age delay
-		// Specification: https://eips.ethereum.org/EIPS/eip-1234
-		fakeBlockNumber := new(big.Int)
-		if parent.Number.Cmp(big.NewInt(4999999)) >= 0 {
-			fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big.NewInt(4999999))
-		}
-		exPeriodRef.Set(fakeBlockNumber)
-
-	} else if config.IsEIP649F(next) {
-		// The calculation uses the Byzantium rules, with bomb offset of 3M.
-		// Specification EIP-649: https://eips.ethereum.org/EIPS/eip-649
-		// Related meta-ish EIP-669: https://github.com/ethereum/EIPs/pull/669
-		// Note, the calculations below looks at the parent number, which is 1 below
-		// the block number. Thus we remove one from the delay given
-
-		fakeBlockNumber := new(big.Int)
-		if parent.Number.Cmp(big.NewInt(2999999)) >= 0 {
-			fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big.NewInt(2999999))
-		}
-		exPeriodRef.Set(fakeBlockNumber)
-
 	} else if config.IsECIP1010(next) {
 		ecip1010Explosion(config, next, exPeriodRef)
 	}

@@ -17,9 +17,14 @@ package params
 
 import (
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var (
+	// Genesis hashes to enforce below configs on.
+	MordorGenesisHash = common.HexToHash("0xa68ebde7932eccb177d38d55dcc6461a019dd795a681e59b5a3e4f3a7259a3f1")
+
 	// MordorChainConfig is the chain parameters to run a node on the Ethereum Classic Mordor test network (PoW).
 	MordorChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(63),
@@ -37,8 +42,4 @@ var (
 		ECIP1010Length:      big.NewInt(2000000),
 		Ethash:              new(EthashConfig),
 	}
-	//
-	//DisinflationRateQuotient = big.NewInt(4)      // Disinflation rate quotient for ECIP1017
-	//DisinflationRateDivisor  = big.NewInt(5)      // Disinflation rate divisor for ECIP1017
-	//ExpDiffPeriod            = big.NewInt(100000) // Exponential diff period for diff bomb & ECIP1010
 )

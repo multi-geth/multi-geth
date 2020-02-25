@@ -316,7 +316,7 @@ func (ethash *Ethash) CalcDifficulty(chain consensus.ChainReader, time uint64, p
 func CalcDifficulty(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
 	next := new(big.Int).Add(parent.Number, big1)
 	switch {
-	case config.IsGenericDifficultyF(next):
+	case config.HasGenericDifficulty():
 		return calcDifficultyGeneric(config, time, parent)
 	case config.IsMuirGlacier(next):
 		return calcDifficultyEip2384(time, parent)
@@ -621,11 +621,13 @@ var (
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
-	if config.IsMCIP0F(header.Number) {
-		return accumulateMCIP0FRewards(config, state, header, uncles)
+	if config.IsMCIP0(header.Number) {
+		accumulateMCIP0Rewards(config, state, header, uncles)
+		return
 	}
-	if config.IsECIP1017F(header.Number) {
-		return accumulateECIP1017FRewards(config, state, header, uncles)
+	if config.HasECIP1017() {
+		accumulateECIP1017Rewards(config, state, header, uncles)
+		return
 	}
 
 	// Select the correct block reward based on chain progression
