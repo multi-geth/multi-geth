@@ -2,13 +2,14 @@
 
 > A "swiss army knife" distribution of _go-ethereum_, with support for many species of Ethereum networks.
 
+[![Build Status](https://dev.azure.com/multi-geth/multi-geth/_apis/build/status/multi-geth.multi-geth?branchName=master)](https://dev.azure.com/multi-geth/multi-geth/_build/latest?definitionId=1&branchName=master)
 [![API Reference](
 https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f676f6c616e672f6764646f3f7374617475732e737667
 )](https://godoc.org/github.com/multi-geth/multi-geth)
 [![Go Report Card](https://goreportcard.com/badge/github.com/multi-geth/multi-geth)](https://goreportcard.com/report/github.com/multi-geth/multi-geth)
+[![Code Shelter](https://www.codeshelter.co/static/badges/badge-flat.svg)](https://www.codeshelter.co/)
 [![Core Paper Discord](https://img.shields.io/discord/586902457053872148)](https://discord.gg/BdRSvJD)
 [![Gitter](https://img.shields.io/gitter/room/multi-geth/community)](https://gitter.im/multi-geth/community)
-[![Code Shelter](https://www.codeshelter.co/static/badges/badge-flat.svg)](https://www.codeshelter.co/)
 
 Binary archives are published at https://github.com/multi-geth/multi-geth/releases.
 

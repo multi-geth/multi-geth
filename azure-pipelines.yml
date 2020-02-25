@@ -47,16 +47,16 @@ jobs:
       rootFolderOrFile: 'build/bin/geth'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-linux.zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-osx.zip'
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: 'build/bin'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-osx.zip'
   - script: |
-      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip.sha256
-      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-osx.zip > $(Build.ArtifactStagingDirectory)/multi-geth-osx.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-osx.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-osx.zip.sha256
     displayName: 'Finalize artifacts'
 
 - job: Windows
@@ -71,17 +71,17 @@ jobs:
     displayName: 'Build artifacts'
   - task: ArchiveFiles@2
     inputs:
-      rootFolderOrFile: 'build/bin/geth'
+      rootFolderOrFile: 'build/bin/geth.exe'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-linux.zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-win64.zip'
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: 'build/bin'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip'
   - script: |
-      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip.sha256
-      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip > $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip.sha256
+      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip.sha256
     displayName: 'Finalize artifacts'
