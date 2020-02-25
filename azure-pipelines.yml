@@ -31,6 +31,7 @@ jobs:
       shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-linux.zip.sha256
       shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-linux.zip.sha256
     displayName: 'Finalize artifacts'
+  - task: PublishBuildArtifacts@1
 
 - job: MacOS
   pool:
@@ -58,6 +59,7 @@ jobs:
       shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-osx.zip > $(Build.ArtifactStagingDirectory)/multi-geth-osx.zip.sha256
       shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-osx.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-osx.zip.sha256
     displayName: 'Finalize artifacts'
+  - task: PublishBuildArtifacts@1
 
 - job: Windows
   pool:
@@ -85,3 +87,4 @@ jobs:
       CertUtil -hashfile $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip SHA256 > $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip.sha256
       CertUtil -hashfile $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip SHA256 > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip.sha256
     displayName: 'Finalize artifacts'
+  - task: PublishBuildArtifacts@1
