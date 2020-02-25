@@ -11,18 +11,8 @@ jobs:
   - task: GoTool@0
     inputs:
       version: '1.13.8'
-  - task: Go@0
-    inputs:
-      command: 'get'
-      arguments: '-d'
-      workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName: 'Get packages'
-  - task: Go@0
-    inputs:
-      command: 'test'
-      arguments: './...'
-      workingDirectory: '$(System.DefaultWorkingDirectory)'
-    displayName: 'Test packages'
+  - script: SKIP_ANDROID_TEST=1 make test
+    displayName: 'Run tests'
   - script: make all
     displayName: 'Build artifacts'
   - task: ArchiveFiles@2
