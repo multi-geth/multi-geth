@@ -12,7 +12,7 @@ jobs:
   steps:
   - task: GoTool@0
     inputs:
-      version: '1.13.5'
+      version: '1.13.8'
   - script: |
       export PATH=$PATH:$GOPATH/bin
       make test
@@ -43,7 +43,7 @@ jobs:
   steps:
   - task: GoTool@0
     inputs:
-      version: '1.13.5'
+      version: '1.13.8'
   - script: make all
     displayName: 'Build artifacts'
   - task: ArchiveFiles@2
@@ -70,7 +70,7 @@ jobs:
   steps:
   - task: GoTool@0
     inputs:
-      version: '1.13.5'
+      version: '1.13.8'
   - script: make all
     displayName: 'Build artifacts'
   - task: ArchiveFiles@2
