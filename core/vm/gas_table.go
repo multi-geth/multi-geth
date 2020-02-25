@@ -99,7 +99,9 @@ func gasSStore(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySi
 		current = evm.StateDB.GetState(contract.Address(), common.BigToHash(x))
 	)
 	// The legacy gas metering only takes into consideration the current state
-	if !evm.chainRules.IsEIP1283F {
+	// Legacy rules should be applied if we are in Petersburg (removal of EIP-1283)
+	// OR Constantinople is not active
+	if evm.chainRules.IsPetersburg || !evm.chainRules.IsConstantinople {
 		// This checks for 3 scenario's and calculates gas accordingly:
 		//
 		// 1. From a zero-value address to a non-zero value         (NEW VALUE)
@@ -329,7 +331,7 @@ func gasCall(evm *EVM, contract *Contract, stack *Stack, mem *Memory, memorySize
 		transfersValue = stack.Back(2).Sign() != 0
 		address        = common.BigToAddress(stack.Back(1))
 	)
-	if evm.chainRules.IsEIP161F {
+	if evm.chainRules.IsEIP158 {
 		if transfersValue && evm.StateDB.Empty(address) {
 			gas += params.CallNewAccountGas
 		}
@@ -422,7 +424,7 @@ func gasSelfdestruct(evm *EVM, contract *Contract, stack *Stack, mem *Memory, me
 		gas = params.SelfdestructGasEIP150
 		var address = common.BigToAddress(stack.Back(0))
 
-		if evm.chainRules.IsEIP161F {
+		if evm.chainRules.IsEIP158 {
 			// if empty and transfers value
 			if evm.StateDB.Empty(address) && evm.StateDB.GetBalance(contract.Address()).Sign() != 0 {
 				gas += params.CreateBySelfdestructGas

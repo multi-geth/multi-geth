@@ -33,7 +33,7 @@ type Config struct {
 	NoRecursion             bool   // Disables call, callcode, delegate call and create
 	EnablePreimageRecording bool   // Enables recording of SHA3/keccak preimages
 
-	JumpTable JumpTable // EVM instruction table, automatically populated if unset
+	JumpTable [256]operation // EVM instruction table, automatically populated if unset
 
 	EWASMInterpreter string // External EWASM interpreter options
 	EVMInterpreter   string // External EVM interpreter options
@@ -91,8 +91,23 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 	// the jump table was initialised. If it was not
 	// we'll set the default jump table.
 	if !cfg.JumpTable[STOP].valid {
-		var jt = instructionSetForConfig(evm.ChainConfig(), evm.BlockNumber)
-
+		var jt JumpTable
+		switch {
+		case evm.chainRules.IsIstanbul:
+			jt = istanbulInstructionSet
+		case evm.chainRules.IsConstantinople:
+			jt = constantinopleInstructionSet
+		case evm.chainRules.IsByzantium:
+			jt = byzantiumInstructionSet
+		case evm.chainRules.IsEIP158:
+			jt = spuriousDragonInstructionSet
+		case evm.chainRules.IsEIP150:
+			jt = tangerineWhistleInstructionSet
+		case evm.chainRules.IsHomestead:
+			jt = homesteadInstructionSet
+		default:
+			jt = frontierInstructionSet
+		}
 		for i, eip := range cfg.ExtraEips {
 			if err := EnableEIP(eip, &jt); err != nil {
 				// Disable it, so caller can check if it's activated or not
@@ -100,7 +115,6 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 				log.Error("EIP activation failed", "eip", eip, "error", err)
 			}
 		}
-
 		cfg.JumpTable = jt
 	}
 
@@ -200,7 +214,7 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			return nil, fmt.Errorf("stack limit reached %d (%d)", sLen, operation.maxStack)
 		}
 		// If the operation is valid, enforce and write restrictions
-		if in.readOnly && in.evm.chainRules.IsEIP214F {
+		if in.readOnly && in.evm.chainRules.IsByzantium {
 			// If the interpreter is operating in readonly mode, make sure no
 			// state-modifying operation is performed. The 3rd stack item
 			// for a call operation is the value. Transferring value from one

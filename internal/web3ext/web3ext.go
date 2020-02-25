@@ -678,13 +678,7 @@ web3._extend({
 const RpcJs = `
 web3._extend({
 	property: 'rpc',
-	methods: [
-		new web3._extend.Method({
-			name: 'discover',
-			call: 'rpc.discover',
-			params: 0
-		}),
-	],
+	methods: [],
 	properties: [
 		new web3._extend.Property({
 			name: 'modules',

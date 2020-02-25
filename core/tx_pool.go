@@ -257,9 +257,6 @@ type TxPool struct {
 	reorgDoneCh     chan chan struct{}
 	reorgShutdownCh chan struct{}  // requests shutdown of scheduleReorgLoop
 	wg              sync.WaitGroup // tracks loop, scheduleReorgLoop
-
-	eip2f    bool
-	eip2028f bool
 }
 
 type txpoolResetRequest struct {
@@ -346,12 +343,6 @@ func (pool *TxPool) loop() {
 		// Handle ChainHeadEvent
 		case ev := <-pool.chainHeadCh:
 			if ev.Block != nil {
-				if pool.chainconfig.IsEIP2F(ev.Block.Number()) {
-					pool.eip2f = true
-				}
-				if pool.chainconfig.IsEIP2028F(ev.Block.Number()) {
-					pool.eip2028f = true
-				}
 				pool.requestReset(head.Header(), ev.Block.Header())
 				head = ev.Block
 			}
@@ -568,7 +559,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInsufficientFunds
 	}
 	// Ensure the transaction has more gas than the basic tx fee.
-	intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, pool.eip2f, pool.eip2028f)
+	intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, true, pool.istanbul)
 	if err != nil {
 		return err
 	}

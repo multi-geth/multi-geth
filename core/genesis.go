@@ -248,20 +248,6 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 		return params.MainnetChainConfig
 	case ghash == params.TestnetGenesisHash:
 		return params.TestnetChainConfig
-	case ghash == params.SocialGenesisHash:
-		return params.SocialChainConfig
-	case ghash == params.MixGenesisHash:
-		return params.MixChainConfig
-	case ghash == params.EthersocialGenesisHash:
-		return params.EthersocialChainConfig
-	case ghash == params.MusicoinGenesisHash:
-		return params.MusicoinChainConfig
-	case ghash == params.RinkebyGenesisHash:
-		return params.RinkebyChainConfig
-	case ghash == params.GoerliGenesisHash:
-		return params.GoerliChainConfig
-	case ghash == params.KottiGenesisHash:
-		return params.KottiChainConfig
 	default:
 		return params.AllEthashProtocolChanges
 	}

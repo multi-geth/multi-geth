@@ -162,48 +162,36 @@ var (
 	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
-		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby, 6=Kotti)",
+		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby)",
 		Value: eth.DefaultConfig.NetworkId,
 	}
 	TestnetFlag = cli.BoolFlag{
 		Name:  "testnet",
 		Usage: "Ropsten network: pre-configured proof-of-work test network",
 	}
-	ClassicFlag = cli.BoolFlag{
-		Name:  "classic",
-		Usage: "Ethereum Classic network: pre-configured Ethereum Classic mainnet",
-	}
-	SocialFlag = cli.BoolFlag{
-		Name:  "social",
-		Usage: "Ethereum Social network: pre-configured Ethereum Social mainnet",
-	}
-	MixFlag = cli.BoolFlag{
-		Name:  "mix",
-		Usage: "MIX network: pre-configured MIX mainnet",
-	}
-	EthersocialFlag = cli.BoolFlag{
-		Name:  "ethersocial",
-		Usage: "Ethersocial network: pre-configured Ethersocial mainnet",
-	}
-	MusicoinFlag = cli.BoolFlag{
-		Name:  "musicoin",
-		Usage: "Musicoin network: pre-configured Musicoin mainnet",
-	}
 	RinkebyFlag = cli.BoolFlag{
 		Name:  "rinkeby",
 		Usage: "Rinkeby network: pre-configured proof-of-authority test network",
 	}
-	KottiFlag = cli.BoolFlag{
-		Name:  "kotti",
-		Usage: "Kotti network: cross-client proof-of-authority test network",
+	GoerliFlag = cli.BoolFlag{
+		Name:  "goerli",
+		Usage: "Görli network: pre-configured proof-of-authority test network",
+	}
+	ClassicFlag = cli.BoolFlag{
+		Name:  "classic",
+		Usage: "Ethereum Classic network: pre-configured Ethereum Classic mainnet",
 	}
 	MordorFlag = cli.BoolFlag{
 		Name:  "mordor",
 		Usage: "Mordor network: Ethereum Classic's cross-client proof-of-work test network",
 	}
-	GoerliFlag = cli.BoolFlag{
-		Name:  "goerli",
-		Usage: "Görli network: pre-configured proof-of-authority test network",
+	KottiFlag = cli.BoolFlag{
+		Name:  "kotti",
+		Usage: "Kotti network: cross-client proof-of-authority test network",
+	}
+	MusicoinFlag = cli.BoolFlag{
+		Name:  "musicoin",
+		Usage: "Musicoin network: pre-configured Musicoin mainnet",
 	}
 	DeveloperFlag = cli.BoolFlag{
 		Name:  "dev",
@@ -791,32 +779,23 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(TestnetFlag.Name) {
 			return filepath.Join(path, "testnet")
 		}
+		if ctx.GlobalBool(RinkebyFlag.Name) {
+			return filepath.Join(path, "rinkeby")
+		}
+		if ctx.GlobalBool(GoerliFlag.Name) {
+			return filepath.Join(path, "goerli")
+		}
 		if ctx.GlobalBool(ClassicFlag.Name) {
 			return filepath.Join(path, "classic")
 		}
 		if ctx.GlobalBool(MordorFlag.Name) {
 			return filepath.Join(path, "mordor")
 		}
-		if ctx.GlobalBool(SocialFlag.Name) {
-			return filepath.Join(path, "social")
-		}
-		if ctx.GlobalBool(MixFlag.Name) {
-			return filepath.Join(path, "mix")
-		}
-		if ctx.GlobalBool(EthersocialFlag.Name) {
-			return filepath.Join(path, "ethersocial")
-		}
-		if ctx.GlobalBool(MusicoinFlag.Name) {
-			return filepath.Join(path, "musicoin")
-		}
-		if ctx.GlobalBool(RinkebyFlag.Name) {
-			return filepath.Join(path, "rinkeby")
-		}
 		if ctx.GlobalBool(KottiFlag.Name) {
 			return filepath.Join(path, "kotti")
 		}
-		if ctx.GlobalBool(GoerliFlag.Name) {
-			return filepath.Join(path, "goerli")
+		if ctx.GlobalBool(MusicoinFlag.Name) {
+			return filepath.Join(path, "musicoin")
 		}
 		return path
 	}
@@ -870,24 +849,18 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	case ctx.GlobalBool(TestnetFlag.Name):
 		urls = params.TestnetBootnodes
+	case ctx.GlobalBool(RinkebyFlag.Name):
+		urls = params.RinkebyBootnodes
+	case ctx.GlobalBool(GoerliFlag.Name):
+		urls = params.GoerliBootnodes
 	case ctx.GlobalBool(ClassicFlag.Name):
 		urls = params.ClassicBootnodes
 	case ctx.GlobalBool(MordorFlag.Name):
 		urls = params.MordorBootnodes
-	case ctx.GlobalBool(SocialFlag.Name):
-		urls = params.SocialBootnodes
-	case ctx.GlobalBool(MixFlag.Name):
-		urls = params.MixBootnodes
-	case ctx.GlobalBool(EthersocialFlag.Name):
-		urls = params.EthersocialBootnodes
-	case ctx.GlobalBool(MusicoinFlag.Name):
-		urls = params.MusicoinBootnodes
-	case ctx.GlobalBool(RinkebyFlag.Name):
-		urls = params.RinkebyBootnodes
 	case ctx.GlobalBool(KottiFlag.Name):
 		urls = params.KottiBootnodes
-	case ctx.GlobalBool(GoerliFlag.Name):
-		urls = params.GoerliBootnodes
+	case ctx.GlobalBool(MusicoinFlag.Name):
+		urls = params.MusicoinBootnodes
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
@@ -918,10 +891,16 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		urls = params.RinkebyBootnodes
-	case ctx.GlobalBool(KottiFlag.Name):
-		urls = params.KottiBootnodes
 	case ctx.GlobalBool(GoerliFlag.Name):
 		urls = params.GoerliBootnodes
+	case ctx.GlobalBool(ClassicFlag.Name):
+		urls = params.ClassicBootnodes
+	case ctx.GlobalBool(MordorFlag.Name):
+		urls = params.MordorBootnodes
+	case ctx.GlobalBool(KottiFlag.Name):
+		urls = params.KottiBootnodes
+	case ctx.GlobalBool(MusicoinFlag.Name):
+		urls = params.MusicoinBootnodes
 	case cfg.BootstrapNodesV5 != nil:
 		return // already set, don't apply defaults.
 	}
@@ -1290,24 +1269,18 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = "" // unless explicitly requested, use memory databases
 	case ctx.GlobalBool(TestnetFlag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "testnet")
+	case ctx.GlobalBool(RinkebyFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "rinkeby")
+	case ctx.GlobalBool(GoerliFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
 	case ctx.GlobalBool(ClassicFlag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "classic")
 	case ctx.GlobalBool(MordorFlag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "mordor")
-	case ctx.GlobalBool(SocialFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "social")
-	case ctx.GlobalBool(MixFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "mix")
-	case ctx.GlobalBool(EthersocialFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "ethersocial")
-	case ctx.GlobalBool(MusicoinFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "musicoin")
-	case ctx.GlobalBool(RinkebyFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "rinkeby")
 	case ctx.GlobalBool(KottiFlag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "kotti")
-	case ctx.GlobalBool(GoerliFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
+	case ctx.GlobalBool(MusicoinFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "musicoin")
 	}
 }
 
@@ -1573,60 +1546,49 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDTestnet
+			cfg.NetworkId = 3
 		}
 		cfg.Genesis = core.DefaultTestnetGenesisBlock()
 		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.TestnetGenesisHash])
+	case ctx.GlobalBool(RinkebyFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 4
+		}
+		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
+		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.RinkebyGenesisHash])
+	case ctx.GlobalBool(GoerliFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 5
+		}
+		cfg.Genesis = core.DefaultGoerliGenesisBlock()
+		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.GoerliGenesisHash])
 	case ctx.GlobalBool(ClassicFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = params.NetworkIDClassic
 		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
+		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.ClassicGenesisHash])
 	case ctx.GlobalBool(MordorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = params.NetworkIDMordor
 		}
 		cfg.Genesis = core.DefaultMordorGenesisBlock()
-	case ctx.GlobalBool(SocialFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDSocial
-		}
-		cfg.Genesis = core.DefaultSocialGenesisBlock()
-	case ctx.GlobalBool(EthersocialFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDEthersocial
-		}
-		cfg.Genesis = core.DefaultEthersocialGenesisBlock()
-	case ctx.GlobalBool(MusicoinFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 7762959
-		}
-		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
-	case ctx.GlobalBool(RinkebyFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDRinkeby
-		}
-		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.RinkebyGenesisHash])
+		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MordorGenesisHash])
 	case ctx.GlobalBool(KottiFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = params.NetworkIDKotti
 		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
-	case ctx.GlobalBool(MixFlag.Name):
+		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.KottiGenesisHash])
+	case ctx.GlobalBool(MusicoinFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDMix
+			cfg.NetworkId = params.NetworkIDMusicoin
 		}
-		cfg.Genesis = core.DefaultMixGenesisBlock()
-	case ctx.GlobalBool(GoerliFlag.Name):
-		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDGoerli
-		}
-		cfg.Genesis = core.DefaultGoerliGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.GoerliGenesisHash])
+		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
+		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MusicoinGenesisHash])
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = params.NetworkIDDeveloper
+			cfg.NetworkId = 1337
 		}
 		// Create new developer account or reuse existing one
 		var (
@@ -1795,24 +1757,18 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
 		genesis = core.DefaultTestnetGenesisBlock()
+	case ctx.GlobalBool(RinkebyFlag.Name):
+		genesis = core.DefaultRinkebyGenesisBlock()
+	case ctx.GlobalBool(GoerliFlag.Name):
+		genesis = core.DefaultGoerliGenesisBlock()
 	case ctx.GlobalBool(ClassicFlag.Name):
 		genesis = core.DefaultClassicGenesisBlock()
 	case ctx.GlobalBool(MordorFlag.Name):
 		genesis = core.DefaultMordorGenesisBlock()
-	case ctx.GlobalBool(SocialFlag.Name):
-		genesis = core.DefaultSocialGenesisBlock()
-	case ctx.GlobalBool(MixFlag.Name):
-		genesis = core.DefaultMixGenesisBlock()
-	case ctx.GlobalBool(EthersocialFlag.Name):
-		genesis = core.DefaultEthersocialGenesisBlock()
-	case ctx.GlobalBool(MusicoinFlag.Name):
-		genesis = core.DefaultMusicoinGenesisBlock()
-	case ctx.GlobalBool(RinkebyFlag.Name):
-		genesis = core.DefaultRinkebyGenesisBlock()
 	case ctx.GlobalBool(KottiFlag.Name):
 		genesis = core.DefaultKottiGenesisBlock()
-	case ctx.GlobalBool(GoerliFlag.Name):
-		genesis = core.DefaultGoerliGenesisBlock()
+	case ctx.GlobalBool(MusicoinFlag.Name):
+		genesis = core.DefaultMusicoinGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}

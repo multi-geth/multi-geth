@@ -41,46 +41,40 @@ type PrecompiledContract interface {
 	Run(input []byte) ([]byte, error) // Run runs the precompiled contract
 }
 
-var basePrecompiledContracts = map[common.Address]PrecompiledContract{
+// PrecompiledContractsHomestead contains the default set of pre-compiled Ethereum
+// contracts used in the Frontier and Homestead releases.
+var PrecompiledContractsHomestead = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{1}): &ecrecover{},
 	common.BytesToAddress([]byte{2}): &sha256hash{},
 	common.BytesToAddress([]byte{3}): &ripemd160hash{},
 	common.BytesToAddress([]byte{4}): &dataCopy{},
 }
 
-// PrecompiledContractsForConfig returns a map containing valid precompiled contracts for a given point in a chain config.
-func PrecompiledContractsForConfig(config *params.ChainConfig, bn *big.Int) map[common.Address]PrecompiledContract {
-	// Copying to a new map is necessary because assigning to the original map
-	// creates a memory reference. Further, setting the vals to nil in case of nonconfiguration causes
-	// a panic during tests because they run asynchronously (also a valid reason for using an explicit copy).
-	precompileds := make(map[common.Address]PrecompiledContract)
-	for k, v := range basePrecompiledContracts {
-		precompileds[k] = v
-	}
-	if config.IsEIP198F(bn) {
-		precompileds[common.BytesToAddress([]byte{5})] = &bigModExp{}
-	}
-	if config.IsEIP213F(bn) {
-		if config.IsEIP1108F(bn) {
-			precompileds[common.BytesToAddress([]byte{6})] = &bn256AddIstanbul{}
-			precompileds[common.BytesToAddress([]byte{7})] = &bn256ScalarMulIstanbul{}
-		} else {
-			precompileds[common.BytesToAddress([]byte{6})] = &bn256AddByzantium{}
-			precompileds[common.BytesToAddress([]byte{7})] = &bn256ScalarMulByzantium{}
-		}
-	}
-	if config.IsEIP212F(bn) {
-		if config.IsEIP1108F(bn) {
-			precompileds[common.BytesToAddress([]byte{8})] = &bn256PairingIstanbul{}
-		} else {
-			precompileds[common.BytesToAddress([]byte{8})] = &bn256PairingByzantium{}
-		}
-	}
-	if config.IsEIP152F(bn) {
-		precompileds[common.BytesToAddress([]byte{9})] = &blake2F{}
-	}
+// PrecompiledContractsByzantium contains the default set of pre-compiled Ethereum
+// contracts used in the Byzantium release.
+var PrecompiledContractsByzantium = map[common.Address]PrecompiledContract{
+	common.BytesToAddress([]byte{1}): &ecrecover{},
+	common.BytesToAddress([]byte{2}): &sha256hash{},
+	common.BytesToAddress([]byte{3}): &ripemd160hash{},
+	common.BytesToAddress([]byte{4}): &dataCopy{},
+	common.BytesToAddress([]byte{5}): &bigModExp{},
+	common.BytesToAddress([]byte{6}): &bn256AddByzantium{},
+	common.BytesToAddress([]byte{7}): &bn256ScalarMulByzantium{},
+	common.BytesToAddress([]byte{8}): &bn256PairingByzantium{},
+}
 
-	return precompileds
+// PrecompiledContractsIstanbul contains the default set of pre-compiled Ethereum
+// contracts used in the Istanbul release.
+var PrecompiledContractsIstanbul = map[common.Address]PrecompiledContract{
+	common.BytesToAddress([]byte{1}): &ecrecover{},
+	common.BytesToAddress([]byte{2}): &sha256hash{},
+	common.BytesToAddress([]byte{3}): &ripemd160hash{},
+	common.BytesToAddress([]byte{4}): &dataCopy{},
+	common.BytesToAddress([]byte{5}): &bigModExp{},
+	common.BytesToAddress([]byte{6}): &bn256AddIstanbul{},
+	common.BytesToAddress([]byte{7}): &bn256ScalarMulIstanbul{},
+	common.BytesToAddress([]byte{8}): &bn256PairingIstanbul{},
+	common.BytesToAddress([]byte{9}): &blake2F{},
 }
 
 // RunPrecompiledContract runs and evaluates the output of a precompiled contract.
