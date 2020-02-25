@@ -7,15 +7,13 @@ jobs:
   pool:
     vmImage: 'ubuntu-latest'
   timeoutInMinutes: 0
-  variables:
-    GOPATH: '$(system.defaultWorkingDirectory)/gopath'
   steps:
   - task: GoTool@0
     inputs:
       version: '1.13.8'
   - script: |
-      export PATH=$PATH:$GOPATH/bin
-      make test
+      go run build/ci.go install
+      go run build/ci.go test
     displayName: 'Run tests'
   - script: make all
     displayName: 'Build artifacts'
