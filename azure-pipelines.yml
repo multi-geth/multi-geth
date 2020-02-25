@@ -86,6 +86,6 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip'
   - script: |
-      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip > $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip.sha256
-      shasum -a 256 $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip.sha256
+      CertUtil -hashfile $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip SHA256 > $(Build.ArtifactStagingDirectory)/multi-geth-win64.zip.sha256
+      CertUtil -hashfile $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip SHA256 > $(Build.ArtifactStagingDirectory)/multi-geth-alltools-win64.zip.sha256
     displayName: 'Finalize artifacts'
