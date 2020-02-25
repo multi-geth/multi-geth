@@ -11,7 +11,7 @@ jobs:
   - task: GoTool@0
     inputs:
       version: '1.13.8'
-  - script: SKIP_TEST_ANDROID=1 SKIP_TEST_SIMULATION=1 make test
+  - script: make test
     displayName: 'Run tests'
   - script: make all
     displayName: 'Build artifacts'

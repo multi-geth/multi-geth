@@ -333,6 +333,10 @@ func doTest(cmdline []string) {
 		gotest.Args = append(gotest.Args, "-v")
 	}
 
+	if os.Getenv("CI") != "" {
+		gotest.Args = append(gotest.Args, "--tags=multigethci")
+	}
+
 	gotest.Args = append(gotest.Args, packages...)
 	build.MustRun(gotest)
 }

@@ -1,3 +1,5 @@
+// +build !multigethci
+
 // Copyright 2016 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -17,7 +19,6 @@
 package whisperv6
 
 import (
-	"os"
 	"bytes"
 	"crypto/ecdsa"
 	"fmt"
@@ -103,11 +104,6 @@ var prevTime time.Time
 var cntPrev int
 
 func TestSimulation(t *testing.T) {
-	// Skip this test if `SKIP_TEST_SIMULATION` is set.
-	if os.Getenv("SKIP_TEST_SIMULATION") != "" {
-		t.Skip("SKIP_TEST_SIMULATION flag set, skipping")
-	}
-
 	// create a chain of whisper nodes,
 	// installs the filters with shared (predefined) parameters
 	initialize(t)
