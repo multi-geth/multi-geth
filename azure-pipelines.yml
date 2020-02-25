@@ -20,7 +20,7 @@ jobs:
   - task: Go@0
     inputs:
       command: 'test'
-      arguments: '-v'
+      arguments: '-v ./...'
       workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Test packages'
   - script: make all
