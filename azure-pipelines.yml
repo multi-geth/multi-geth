@@ -21,7 +21,7 @@ jobs:
     inputs:
       command: 'test'
       arguments: '-v'
-      workingDirectory: '$(modulePath)'
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
     displayName: 'Test packages'
   - script: make all
     displayName: 'Build artifacts'
