@@ -1,84 +1,49 @@
-## Go Ethereum
+## MultiGeth
 
 > A "swiss army knife" distribution of _go-ethereum_, with support for many species of Ethereum networks.
 
-[![OpenRPC](https://img.shields.io/static/v1.svg?label=OpenRPC&message=1.1.8&color=blue)](#openrpc-discovery)
 [![API Reference](
 https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f676f6c616e672f6764646f3f7374617475732e737667
 )](https://godoc.org/github.com/multi-geth/multi-geth)
 [![Go Report Card](https://goreportcard.com/badge/github.com/multi-geth/multi-geth)](https://goreportcard.com/report/github.com/multi-geth/multi-geth)
-[![Travis](https://travis-ci.org/multi-geth/multi-geth.svg?branch=master)](https://travis-ci.org/multi-geth/multi-geth)
+[![Core Paper Discord](https://img.shields.io/discord/586902457053872148)](https://discord.gg/BdRSvJD)
+[![Gitter](https://img.shields.io/gitter/room/multi-geth/community)](https://gitter.im/multi-geth/community)
 [![Code Shelter](https://www.codeshelter.co/static/badges/badge-flat.svg)](https://www.codeshelter.co/)
 
 Binary archives are published at https://github.com/multi-geth/multi-geth/releases.
 
-Upstream development from [ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) is merged to this repository regularly,
- usually at every upstream tagged release. Every effort is made to maintain seamless compatibility with upstream source, including compatible RPC, JS, and CLI
- APIs, data storage locations and schemas, and, of course, interoperable client protocols. Applicable bug reports, bug fixes, features, and proposals should be
- made upstream whenever possible.
+## Notes on the project
 
-## Network/client comparison
+Upstream development from [ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) is merged to this repository regularly, usually at every upstream tagged release. Every effort is made to maintain seamless compatibility with upstream source, including compatible RPC, JS, and CLI APIs, data storage locations and schemas, and, of course, interoperable client protocols. Applicable bug reports, bug fixes, features, and proposals should be made upstream whenever possible.
 
-Networks supported by the respective go-ethereum packaged `geth` client.
+### Maintainers
 
-| Ticker | Network/Client                        | multi-geth                                       | [ethereumclassic/go-ethereum](https://github.com/ethereumclassic/go-ethereum) | [ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) |
-| ---    | ---                                   | ---                                              | ---                                                                           | ---                                                             |
-| ETH    | Ethereum (Foundation)                 | :heavy_check_mark:                               |                                                                               | :heavy_check_mark:                                              |
-| ETC    | Ethereum Classic                      | :heavy_check_mark:                               | :heavy_check_mark:                                                            |                                                                 |
-| ETSC   | Ethereum Social                       | :heavy_check_mark:                               |                                                                               |                                                                 |
-| ESN    | EtherSocial                           | :heavy_check_mark:                               |                                                                               |                                                                 |
-| MIX    | Mix                                   | :heavy_check_mark:                               |                                                                               |                                                                 |
-| EXP    | Expanse                               |                                                  |                                                                               |                                                                 |
-| ELLA   | Ellaism                               | :no_entry_sign:<sup>[1](#ellaism-footnote)</sup> |                                                                               |                                                                 |
-| MUSIC  | Musicoin                              | :heavy_check_mark:                               |                                                                               |                                                                 |
-|        | Morden (Geth+Parity ETH PoW Testnet)  |                                                  | :heavy_check_mark:                                                            |                                                                 |
-|        | Ropsten (Geth+Parity ETH PoW Testnet) | :heavy_check_mark:                               |                                                                               | :heavy_check_mark:                                              |
-|        | Rinkeby (Geth-only ETH PoA Testnet)   | :heavy_check_mark:                               |                                                                               | :heavy_check_mark:                                              |
-|        | Goerli (Geth+Parity ETH PoA Testnet)  | :heavy_check_mark:                               |                                                                               | :heavy_check_mark:                                              |
-|        | Kotti (Geth+Parity ETC PoA Testnet)   | :heavy_check_mark:                               |                                                                               |                                                                 |
-|        | Kovan (Parity-only ETH PoA Testnet)   |                                                  |                                                                               |                                                                 |
-|        | Tobalaba (EWF Testnet)                |                                                  |                                                                               |                                                                 |
-|        | Ephemeral development PoA network     | :heavy_check_mark:                               |                                                                               |                                                                 |
-|        | Private chains                        | :heavy_check_mark:                               | :heavy_check_mark:                                                            | :heavy_check_mark:                                              |
+Special thanks to all maintainers of the MultiGeth project (ordered alphabetically):
 
-<a name="ellaism-footnote">1</a>: This is originally an [Ellaism
-Project](https://github.com/ellaism). However, A [recent hard
-fork](https://github.com/ellaism/specs/blob/master/specs/2018-0003-wasm-hardfork.md)
-makes Ellaism not feasible to support with go-ethereum any more. Existing
-Ellaism users are asked to switch to
-[Parity](https://github.com/paritytech/parity).
+* Code Shelter (Team)
+* Gödel Labs (Team)
+* Wei Tang
 
-## Managing versions
+### Networks
 
-Since this is a downstream fork of [ethereum/go-ethereum](https://github.com/ethereum/go-ethereum), you'll want to maintain the go import path and git remotes accordingly.
-This repository should occupy `$GOPATH/src/github.com/ethereum/go-ethereum`, and you can optionally use `git` to set this fork as a default upstream remote.
-On Linux or Mac, this can be accomplished by the following or similar.
+MultiGeth currently supports the following networks:
 
-For __a fresh install__, the below. This will set [multi-geth/multi-geth](https://github.com/multi-geth/multi-geth) as as the `git` remote `origin` by default.
+* Ethereum mainnet: run without any additional parameters.
+* Ropsten testnet: run with `--testnet`.
+* Goerli testnet: run with `--goerli`.
+* Ethereum Classic mainnet: run with `--classic`.
+* Mordor testnet: run with `--mordor`.
+* Kotti testnet: run with `--kotti`.
 
-```sh
-$ env path=$GOPATH/src/github.com/ethereum mkdir -p $path && cd $path
-$ git clone https://github.com/multi-geth/multi-geth.git go-ethereum && cd go-ethereum
-```
+### RFCs
 
-Or, with __an existing copy of the ethereum/go-ethereum source__, the below. This will set [multi-geth/multi-geth](https://github.com/multi-geth/multi-geth) as the `git` remote `multi-geth`,
-and set the local branch `master` to track this repository's `master` branch.
-
-```sh
-$ cd $GOPATH/src/github.com/ethereum/go-ethereum
-$ git remote add multi-geth https://github.com/multi-geth/multi-geth.git
-$ git fetch multi-geth
-$ git checkout -B master -t multi-geth/master
-```
-
-:information_source: Note that these instructions assume a traditional use of `GOPATH`-based Go project organization. Because of the way the `make` command works for this project (using a "GOPATH/work dir" pattern for building)
-you don't have to follow tradition to build; cloning this repo anywhere in your filesystem should be adequate.
+For changes to MultiGeth that is of high value and may affects a large number of users (such as hard forks and feature upgrades), we may require it to go through MultiGeth's [RFCs](https://github.com/multi-geth/rfcs) process. This adds protections so that we have more confidence that a hard fork is safe and contains no bug. Still, it's important to note that as an open source project, MultiGeth provides no warranty.
 
 ## Building the source
 
 For prerequisites and detailed build instructions please read the [Installation Instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) on the wiki.
 
-Building `geth` requires both a Go (version 1.11 or later) and a C compiler. You can install
+Building `geth` requires both a Go (version 1.10 or later) and a C compiler. You can install
 them using your favourite package manager. Once the dependencies are installed, run
 
 ```shell
@@ -90,7 +55,6 @@ or, to build the full suite of utilities:
 ```shell
 make all
 ```
-
 
 ## Executables
 
@@ -104,9 +68,8 @@ directory.
 |  `bootnode`   | Stripped down version of our Ethereum client implementation that only takes part in the network node discovery protocol, but does not run any of the higher level application protocols. It can be used as a lightweight bootstrap node to aid in finding peers in private networks.                                                                                                                                                                                                                                                                 |
 |     `evm`     | Developer utility version of the EVM (Ethereum Virtual Machine) that is capable of running bytecode snippets within a configurable environment and execution mode. Its purpose is to allow isolated, fine-grained debugging of EVM opcodes (e.g. `evm --code 60ff60ff --debug run`).                                                                                                                                                                                                                                                                     |
 | `gethrpctest` | Developer utility tool to support our [ethereum/rpc-test](https://github.com/ethereum/rpc-tests) test suite which validates baseline conformity to the [Ethereum JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC) specs. Please see the [test suite's readme](https://github.com/ethereum/rpc-tests/blob/master/README.md) for details.                                                                                                                                                                                                     |
-| `rlpdump`     | Developer utility tool to convert binary RLP ([Recursive Length Prefix](https://github.com/ethereum/wiki/wiki/RLP)) dumps (data encoding used by the Ethereum protocol both network as well as consensus wise) to user-friendlier hierarchical representation (e.g. `rlpdump --hex CE0183FFFFFFC4C304050583616263`).                                                                                                                                                                                                                                 |
-| `puppeth`     | a CLI wizard that aids in creating a new Ethereum network.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-
+|   `rlpdump`   | Developer utility tool to convert binary RLP ([Recursive Length Prefix](https://github.com/ethereum/wiki/wiki/RLP)) dumps (data encoding used by the Ethereum protocol both network as well as consensus wise) to user-friendlier hierarchical representation (e.g. `rlpdump --hex CE0183FFFFFFC4C304050583616263`).                                                                                                                                                                                                                                 |
+|   `puppeth`   | a CLI wizard that aids in creating a new Ethereum network.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## Running `geth`
 
@@ -115,15 +78,15 @@ Going through all the possible command line flags is out of scope here (please c
 but we've enumerated a few common parameter combos to get you up to speed quickly
 on how you can run your own `geth` instance.
 
-### Fast node on an Ethereum network
+### Full node on the main Ethereum network
 
 By far the most common scenario is people wanting to simply interact with the Ethereum
 network: create accounts; transfer funds; deploy and interact with contracts. For this
 particular use-case the user doesn't care about years-old historical data, so we can
 fast-sync quickly to the current state of the network. To do so:
 
-```
-$ geth [|--classic|--social|--ethersocial|--mix|--music|--testnet|--rinkeby|--kotti|--goerli] console
+```shell
+$ geth console
 ```
 
 This command will:
@@ -182,9 +145,6 @@ supported by go-ethereum.
 $ geth --rinkeby console
 ```
 
-This command will start geth in a full archive mode, causing it to download, process, and store the entirety
-of available chain data.
-
 ### Configuration
 
 As an alternative to passing the numerous flags to the `geth` binary, you can also pass a
@@ -211,7 +171,7 @@ Docker:
 ```shell
 docker run -d --name ethereum-node -v /Users/alice/ethereum:/root \
            -p 8545:8545 -p 30303:30303 \
-           multigeth/multi-geth
+           ethereum/client-go
 ```
 
 This will start `geth` in fast-sync mode with a DB memory allowance of 1GB just as the
@@ -263,44 +223,6 @@ transport before doing so! Hackers on the internet are actively trying to subver
 Ethereum nodes with exposed APIs! Further, all browser tabs can access locally
 running web servers, so malicious web pages could try to subvert locally available
 APIs!**
-
-### OpenRPC Discovery
-
-MultiGeth supports [OpenRPC's Service Discovery method](https://spec.open-rpc.org/#service-discovery-method), enabling efficient and well-spec'd JSON RPC interfacing and tooling. This method follows the established JSON RPC patterns, and is accessible via HTTP, WebSocket, IPC, and console servers. To use this method:
-```shell
-$ curl -X POST -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"rpc.discover","params":[],"id":1}'
-{                                                                                                                                                         
-  "jsonrpc": "2.0",                                                                                                                                       
-  "id": 1,                                                                                                                                                
-  "result": {                                                                                                                                             
-    "openrpc": "1.0.10",                                                                                                                                   
-    "info": {                                                                                                                                             
-      "description": "This API lets you interact with an EVM-based client via JSON-RPC",                                                                  
-      "license": {                                                                                                                                        
-        "name": "Apache 2.0",                                                                                                                             
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.html"                                                                                         
-      },                                                                                                                                                  
-      "title": "Ethereum JSON-RPC",                                                                                                                       
-      "version": "1.0.0"                                                                                                                                  
-    },                                                                                                                                                    
-    "servers": [],                                                                                                                                      
-    "methods": [                                                                                                                                          
-      {                                                                                                                                                   
-        "description": "Returns the version of the current client",                                                                                       
-        "name": "web3_clientVersion",                                                                                                                     
-        "params": [],                                                                                                                                     
-        "result": {                                                                                                                                       
-          "description": "client version",                                                                                                                
-          "name": "clientVersion",                                                                                                                        
-          "schema": {                                                                                                                                     
-            "type": "string"                                                                                                                              
-          }                                                                                                                                               
-        },                                                                                                                                                
-        "summary": "current client version"                                                                                                               
-      },                      
-
-[...]
-```
 
 ### Operating a private network
 
@@ -451,4 +373,3 @@ also included in our repository in the `COPYING.LESSER` file.
 The go-ethereum binaries (i.e. all code inside of the `cmd` directory) is licensed under the
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), also
 included in our repository in the `COPYING` file.
-
