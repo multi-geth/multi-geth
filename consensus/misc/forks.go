@@ -38,6 +38,12 @@ func VerifyForkHashes(config *params.ChainConfig, header *types.Header, uncle bo
 			return fmt.Errorf("homestead gas reprice fork: have 0x%x, want 0x%x", header.Hash(), config.EIP150Hash)
 		}
 	}
+	// If the byzantium hash is set, validate it
+	if config.ByzantiumBlock != nil && config.ByzantiumBlock.Cmp(header.Number) == 0 {
+		if config.ByzantiumHash != (common.Hash{}) && config.ByzantiumHash != header.Hash() {
+			return fmt.Errorf("byzantium fork: have 0x%x, want 0x%x", header.Hash(), config.EIP150Hash)
+		}
+	}
 	// All ok, return
 	return nil
 }

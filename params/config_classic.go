@@ -36,6 +36,7 @@ var (
 		EIP155Block:         big.NewInt(3000000),
 		EIP158Block:         big.NewInt(8772000),
 		ByzantiumBlock:      big.NewInt(8772000),
+		ByzantiumHash:       common.HexToHash("0xeed20bd3e793178f75cc2e86ddb3c19b4423f9e2915a087e265452f9c3c45efb"),
 		DisposalBlock:       big.NewInt(5900000),
 		ConstantinopleBlock: big.NewInt(9573000),
 		PetersburgBlock:     big.NewInt(9573000),

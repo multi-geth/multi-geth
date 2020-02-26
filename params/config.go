@@ -233,13 +233,14 @@ var (
 		big.NewInt(0), // PetersburgBlock
 		big.NewInt(0), // IstanbulBlock
 		big.NewInt(0), // MuirGlacierBlock
-		nil, // EWASMBlock
+		nil,           // EWASMBlock
 
-		nil, // EIP160Block
-		nil, // ECIP1010PauseBlock
-		nil, // ECIP1010Length
-		nil, // ECIP1017EraRounds
-		nil, // DisposalBlock
+		nil,           // EIP160Block
+		nil,           // ECIP1010PauseBlock
+		nil,           // ECIP1010Length
+		nil,           // ECIP1017EraRounds
+		nil,           // DisposalBlock
+		common.Hash{}, // ByzantiumHash
 
 		nil, // MCIP0Block
 		nil, // MCIP3Block
@@ -272,13 +273,14 @@ var (
 		big.NewInt(0), // PetersburgBlock
 		big.NewInt(0), // IstanbulBlock
 		big.NewInt(0), // MuirGlacierBlock
-		nil, // EWASMBlock
+		nil,           // EWASMBlock
 
-		nil, // EIP160Block
-		nil, // ECIP1010PauseBlock
-		nil, // ECIP1010Length
-		nil, // ECIP1017EraRounds
-		nil, // DisposalBlock
+		nil,           // EIP160Block
+		nil,           // ECIP1010PauseBlock
+		nil,           // ECIP1010Length
+		nil,           // ECIP1017EraRounds
+		nil,           // DisposalBlock
+		common.Hash{}, // ByzantiumHash
 
 		nil, // MCIP0Block
 		nil, // MCIP3Block
@@ -309,13 +311,14 @@ var (
 		big.NewInt(0), // PetersburgBlock
 		big.NewInt(0), // IstanbulBlock
 		big.NewInt(0), // MuirGlacierBlock
-		nil, // EWASMBlock
+		nil,           // EWASMBlock
 
-		nil, // EIP160Block
-		nil, // ECIP1010PauseBlock
-		nil, // ECIP1010Length
-		nil, // ECIP1017EraRounds
-		nil, // DisposalBlock
+		nil,           // EIP160Block
+		nil,           // ECIP1010PauseBlock
+		nil,           // ECIP1010Length
+		nil,           // ECIP1017EraRounds
+		nil,           // DisposalBlock
+		common.Hash{}, // ByzantiumHash
 
 		nil, // MCIP0Block
 		nil, // MCIP3Block
@@ -403,11 +406,12 @@ type ChainConfig struct {
 	// (a.) varies from it's 'siblings', which have 'F's in them
 	// (b.) without the 'F' will vary from ETH implementations if they choose to accept the proposed changes
 	// with corresponding refactoring (https://github.com/ethereum/go-ethereum/pull/18401)
-	EIP160Block        *big.Int `json:"eip160Block,omitempty"`
-	ECIP1010PauseBlock *big.Int `json:"ecip1010PauseBlock,omitempty"` // ECIP1010 pause HF block
-	ECIP1010Length     *big.Int `json:"ecip1010Length,omitempty"`     // ECIP1010 length
-	ECIP1017EraRounds  *big.Int `json:"ecip1017EraRounds,omitempty"`  // ECIP1017 era rounds
-	DisposalBlock      *big.Int `json:"disposalBlock,omitempty"`      // Bomb disposal HF block
+	EIP160Block        *big.Int    `json:"eip160Block,omitempty"`
+	ECIP1010PauseBlock *big.Int    `json:"ecip1010PauseBlock,omitempty"` // ECIP1010 pause HF block
+	ECIP1010Length     *big.Int    `json:"ecip1010Length,omitempty"`     // ECIP1010 length
+	ECIP1017EraRounds  *big.Int    `json:"ecip1017EraRounds,omitempty"`  // ECIP1017 era rounds
+	DisposalBlock      *big.Int    `json:"disposalBlock,omitempty"`      // Bomb disposal HF block
+	ByzantiumHash      common.Hash `json:"byzantiumHash,omitempty"`      // Byzantium HF hash
 
 	MCIP0Block *big.Int `json:"mcip0Block,omitempty"` // Musicoin default block; no MCIP, just denotes chain pref
 	MCIP3Block *big.Int `json:"mcip3Block,omitempty"` // Musicoin 'UBI Fork' block
