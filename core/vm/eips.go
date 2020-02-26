@@ -33,8 +33,6 @@ func EnableEIP(eipNum int, jt *JumpTable) error {
 		enable1884(jt)
 	case 1344:
 		enable1344(jt)
-	case 160:
-		enable160(jt)
 	default:
 		return fmt.Errorf("undefined eip %d", eipNum)
 	}
@@ -91,9 +89,4 @@ func opChainID(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memo
 // enable2200 applies EIP-2200 (Rebalance net-metered SSTORE)
 func enable2200(jt *JumpTable) {
 	jt[SSTORE].dynamicGas = gasSStoreEIP2200
-}
-
-// enable160 applies EIP-160
-func enable160(jt *JumpTable) {
-	jt[EXP].dynamicGas = gasExpEIP158
 }

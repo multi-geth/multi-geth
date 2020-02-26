@@ -101,6 +101,8 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 			jt = byzantiumInstructionSet
 		case evm.chainRules.IsEIP158:
 			jt = spuriousDragonInstructionSet
+		case evm.chainRules.IsEIP160:
+			jt = spuriousDragonInstructionSet
 		case evm.chainRules.IsEIP150:
 			jt = tangerineWhistleInstructionSet
 		case evm.chainRules.IsHomestead:
@@ -108,12 +110,6 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 		default:
 			jt = frontierInstructionSet
 		}
-
-		switch {
-		case evm.chainRules.IsEIP160:
-			cfg.ExtraEips = append(cfg.ExtraEips, 160)
-		}
-
 		for i, eip := range cfg.ExtraEips {
 			if err := EnableEIP(eip, &jt); err != nil {
 				// Disable it, so caller can check if it's activated or not
