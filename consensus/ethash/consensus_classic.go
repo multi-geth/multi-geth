@@ -18,7 +18,6 @@ package ethash
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
@@ -122,87 +121,4 @@ func getBlockWinnerRewardByEra(era *big.Int, blockReward *big.Int) *big.Int {
 	r.Div(r, d)
 
 	return r
-}
-
-func calcDifficultyClassic(config *params.ChainConfig, time uint64, parent *types.Header) *big.Int {
-	next := new(big.Int).Add(parent.Number, big1)
-	out := new(big.Int)
-
-	// ADJUSTMENT algorithms
-	if config.IsByzantium(next) {
-		// https://github.com/ethereum/EIPs/issues/100
-		// algorithm:
-		// diff = (parent_diff +
-		//         (parent_diff / 2048 * max((2 if len(parent.uncles) else 1) - ((timestamp - parent.timestamp) // 9), -99))
-		//        ) + 2^(periodCount - 2)
-		out.Div(parentTimeDelta(time, parent), big9)
-
-		if parent.UncleHash == types.EmptyUncleHash {
-			out.Sub(big1, out)
-		} else {
-			out.Sub(big2, out)
-		}
-		out.Set(math.BigMax(out, bigMinus99))
-		out.Mul(parentDiffOverDbd(parent), out)
-		out.Add(out, parent.Difficulty)
-
-	} else if config.IsHomestead(next) {
-		// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
-		// algorithm:
-		// diff = (parent_diff +
-		//         (parent_diff / 2048 * max(1 - (block_timestamp - parent_timestamp) // 10, -99))
-		//        )
-		out.Div(parentTimeDelta(time, parent), big10)
-		out.Sub(big1, out)
-		out.Set(math.BigMax(out, bigMinus99))
-		out.Mul(parentDiffOverDbd(parent), out)
-		out.Add(out, parent.Difficulty)
-
-	} else {
-		// FRONTIER
-		// algorithm:
-		// diff =
-		//   if parent_block_time_delta < params.DurationLimit
-		//      parent_diff + (parent_diff // 2048)
-		//   else
-		//      parent_diff - (parent_diff // 2048)
-		out.Set(parent.Difficulty)
-		if parentTimeDelta(time, parent).Cmp(params.DurationLimit) < 0 {
-			out.Add(out, parentDiffOverDbd(parent))
-		} else {
-			out.Sub(out, parentDiffOverDbd(parent))
-		}
-	}
-
-	// after adjustment and before bomb
-	out.Set(math.BigMax(out, params.MinimumDifficulty))
-
-	// EXPLOSION delays
-
-	// exPeriodRef the explosion clause's reference point
-	exPeriodRef := new(big.Int).Add(parent.Number, big1)
-
-	if config.IsBombDisposal(next) {
-		return out
-	} else if config.IsECIP1010(next) {
-		ecip1010Explosion(config, next, exPeriodRef)
-	}
-
-	// EXPLOSION
-
-	// the 'periodRef' (from above) represents the many ways of hackishly modifying the reference number
-	// (ie the 'currentBlock') in order to lie to the function about what time it really is
-	//
-	//   2^(( periodRef // EDP) - 2)
-	//
-	x := new(big.Int)
-	x.Div(exPeriodRef, params.ExpDiffPeriod) // (periodRef // EDP)
-	if x.Cmp(big1) > 0 {                     // if result large enough (not in algo explicitly)
-		x.Sub(x, big2)      // - 2
-		x.Exp(big2, x, nil) // 2^
-	} else {
-		x.SetUint64(0)
-	}
-	out.Add(out, x)
-	return out
 }
