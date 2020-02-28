@@ -81,4 +81,6 @@ var KnownDNSNetworks = map[common.Hash]string{
 	TestnetGenesisHash: dnsPrefix + "all.ropsten.ethdisco.net",
 	RinkebyGenesisHash: dnsPrefix + "all.rinkeby.ethdisco.net",
 	GoerliGenesisHash:  dnsPrefix + "all.goerli.ethdisco.net",
+	MordorGenesisHash:  "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.mordor.blockd.info",
+	KottiGenesisHash:   "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.kotti.blockd.info",
 }

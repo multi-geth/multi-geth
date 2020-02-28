@@ -1567,7 +1567,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 1
 		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.ClassicGenesisHash])
+		cfg.DiscoveryURLs = []string{"enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.classic.blockd.info"}
 	case ctx.GlobalBool(MordorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7
