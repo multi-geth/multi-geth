@@ -16,8 +16,6 @@
 
 package params
 
-import "github.com/ethereum/go-ethereum/common"
-
 // MainnetBootnodes are the enode URLs of the P2P bootstrap nodes running on
 // the main Ethereum network.
 var MainnetBootnodes = []string{
@@ -76,11 +74,10 @@ const dnsPrefix = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUD
 
 // These DNS names provide bootstrap connectivity for public testnets and the mainnet.
 // See https://github.com/ethereum/discv4-dns-lists for more information.
-var KnownDNSNetworks = map[common.Hash]string{
-	MainnetGenesisHash: dnsPrefix + "all.mainnet.ethdisco.net",
-	TestnetGenesisHash: dnsPrefix + "all.ropsten.ethdisco.net",
-	RinkebyGenesisHash: dnsPrefix + "all.rinkeby.ethdisco.net",
-	GoerliGenesisHash:  dnsPrefix + "all.goerli.ethdisco.net",
-	MordorGenesisHash:  "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.mordor.blockd.info",
-	KottiGenesisHash:   "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.kotti.blockd.info",
-}
+var MainnetKnownDNSNetwork = dnsPrefix + "all.mainnet.ethdisco.net"
+var TestnetKnownDNSNetwork = dnsPrefix + "all.ropsten.ethdisco.net"
+var RinkebyKnownDNSNetwork = dnsPrefix + "all.rinkeby.ethdisco.net"
+var GoerliKnownDNSNetwork  = dnsPrefix + "all.goerli.ethdisco.net"
+var ClassicKnownDNSNetwork = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.classic.blockd.info"
+var MordorKnownDNSNetwork  = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.mordor.blockd.info"
+var KottiKnownDNSNetwork   = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.kotti.blockd.info"

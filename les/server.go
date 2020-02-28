@@ -94,9 +94,6 @@ func NewLesServer(e *eth.Ethereum, config *eth.Config) (*LesServer, error) {
 
 	// Set up checkpoint oracle.
 	oracle := config.CheckpointOracle
-	if oracle == nil {
-		oracle = params.CheckpointOracles[e.BlockChain().Genesis().Hash()]
-	}
 	srv.oracle = checkpointoracle.New(oracle, srv.localCheckpoint)
 
 	// Initialize server capacity management fields.

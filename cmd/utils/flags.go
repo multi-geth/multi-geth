@@ -1549,43 +1549,48 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 3
 		}
 		cfg.Genesis = core.DefaultTestnetGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.TestnetGenesisHash])
+		cfg.Checkpoint = params.TestnetTrustedCheckpoint
+		cfg.CheckpointOracle = params.TestnetCheckpointOracle
+		setDNSDiscoveryDefaults(cfg, params.TestnetKnownDNSNetwork)
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 4
 		}
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.RinkebyGenesisHash])
+		cfg.Checkpoint = params.RinkebyTrustedCheckpoint
+		cfg.CheckpointOracle = params.RinkebyCheckpointOracle
+		setDNSDiscoveryDefaults(cfg, params.RinkebyKnownDNSNetwork)
 	case ctx.GlobalBool(GoerliFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 5
 		}
 		cfg.Genesis = core.DefaultGoerliGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.GoerliGenesisHash])
+		cfg.Checkpoint = params.GoerliTrustedCheckpoint
+		cfg.CheckpointOracle = params.GoerliCheckpointOracle
+		setDNSDiscoveryDefaults(cfg, params.GoerliKnownDNSNetwork)
 	case ctx.GlobalBool(ClassicFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1
 		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
-		cfg.DiscoveryURLs = []string{"enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.classic.blockd.info"}
+		setDNSDiscoveryDefaults(cfg, params.ClassicKnownDNSNetwork)
 	case ctx.GlobalBool(MordorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7
 		}
 		cfg.Genesis = core.DefaultMordorGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MordorGenesisHash])
+		setDNSDiscoveryDefaults(cfg, params.MordorKnownDNSNetwork)
 	case ctx.GlobalBool(KottiFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 6
 		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.KottiGenesisHash])
+		setDNSDiscoveryDefaults(cfg, params.KottiKnownDNSNetwork)
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7762959
 		}
 		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MusicoinGenesisHash])
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
@@ -1614,7 +1619,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		}
 	default:
 		if cfg.NetworkId == 1 {
-			setDNSDiscoveryDefaults(cfg, params.KnownDNSNetworks[params.MainnetGenesisHash])
+			setDNSDiscoveryDefaults(cfg, params.MainnetKnownDNSNetwork)
 		}
 	}
 }
