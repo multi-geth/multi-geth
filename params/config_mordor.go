@@ -35,6 +35,7 @@ var (
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: big.NewInt(301243),
 		PetersburgBlock:     big.NewInt(301243),
+		IstanbulBlock:       big.NewInt(999983),
 		DisposalBlock:       big.NewInt(0),
 		ECIP1017EraRounds:   big.NewInt(2000000),
 		EIP160Block:         big.NewInt(0),
