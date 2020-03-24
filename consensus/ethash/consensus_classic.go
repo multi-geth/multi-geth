@@ -27,7 +27,7 @@ func accumulateECIP1017Rewards(config *params.ChainConfig, state *state.StateDB,
 	blockReward := FrontierBlockReward
 
 	// Ensure value 'era' is configured.
-	eraLen := config.ECIP1017EraRounds
+	eraLen := config.ECIP1017EraBlock
 	era := getBlockEra(header.Number, eraLen)
 	wr := getBlockWinnerRewardByEra(era, blockReward)                    // wr "winner reward". 5, 4, 3.2, 2.56, ...
 	wurs := getBlockWinnerRewardForUnclesByEra(era, uncles, blockReward) // wurs "winner uncle rewards"

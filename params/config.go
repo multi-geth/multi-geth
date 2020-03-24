@@ -220,7 +220,7 @@ var (
 		nil, // EIP160Block
 		nil, // ECIP1010PauseBlock
 		nil, // ECIP1010Length
-		nil, // ECIP1017EraRounds
+		nil, // ECIP1017EraBlock
 		nil, // DisposalBlock
 
 		nil, // MCIP0Block
@@ -259,7 +259,7 @@ var (
 		nil, // EIP160Block
 		nil, // ECIP1010PauseBlock
 		nil, // ECIP1010Length
-		nil, // ECIP1017EraRounds
+		nil, // ECIP1017EraBlock
 		nil, // DisposalBlock
 
 		nil, // MCIP0Block
@@ -296,7 +296,7 @@ var (
 		nil, // EIP160Block
 		nil, // ECIP1010PauseBlock
 		nil, // ECIP1010Length
-		nil, // ECIP1017EraRounds
+		nil, // ECIP1017EraBlock
 		nil, // DisposalBlock
 
 		nil, // MCIP0Block
@@ -388,7 +388,7 @@ type ChainConfig struct {
 	EIP160Block        *big.Int `json:"eip160Block,omitempty"`
 	ECIP1010PauseBlock *big.Int `json:"ecip1010PauseBlock,omitempty"` // ECIP1010 pause HF block
 	ECIP1010Length     *big.Int `json:"ecip1010Length,omitempty"`     // ECIP1010 length
-	ECIP1017EraRounds  *big.Int `json:"ecip1017EraRounds,omitempty"`  // ECIP1017 era rounds
+	ECIP1017EraBlock   *big.Int `json:"ecip1017EraBlock,omitempty"`   // ECIP1017 era rounds
 	DisposalBlock      *big.Int `json:"disposalBlock,omitempty"`      // Bomb disposal HF block
 
 	MCIP0Block *big.Int `json:"mcip0Block,omitempty"` // Musicoin default block; no MCIP, just denotes chain pref
@@ -506,7 +506,7 @@ func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 
 // HasECIP1017 returns whether the chain is configured with ECIP1017.
 func (c *ChainConfig) HasECIP1017() bool {
-	if c.ECIP1017EraRounds == nil {
+	if c.ECIP1017EraBlock == nil {
 		return false
 	} else {
 		return true
