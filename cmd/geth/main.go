@@ -150,6 +150,7 @@ var (
 		utils.MordorFlag,
 		utils.KottiFlag,
 		utils.MusicoinFlag,
+		utils.OpposePhoenixForkFlag,
 		configFileFlag,
 	}
 

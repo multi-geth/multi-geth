@@ -257,6 +257,10 @@ var (
 		Name:  "override.muirglacier",
 		Usage: "Manually specify Muir Glacier fork-block, overriding the bundled setting",
 	}
+	OpposePhoenixForkFlag = cli.BoolFlag{
+		Name:  "oppose-phoenix-fork",
+		Usage: "Oppose the Phoenix hard fork on Ethereum Classic, staying on the non-fork side",
+	}
 	// Light server and client settings
 	LightLegacyServFlag = cli.IntFlag{ // Deprecated in favor of light.serve, remove in 2021
 		Name:  "lightserv",

@@ -153,6 +153,9 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	if ctx.GlobalIsSet(utils.OverrideMuirGlacierFlag.Name) {
 		cfg.Eth.OverrideMuirGlacier = new(big.Int).SetUint64(ctx.GlobalUint64(utils.OverrideMuirGlacierFlag.Name))
 	}
+	if ctx.GlobalIsSet(utils.OpposePhoenixForkFlag.Name) {
+		params.ClassicChainConfig.IstanbulBlock = nil
+	}
 	utils.RegisterEthService(stack, &cfg.Eth)
 
 	// Whisper must be explicitly enabled by specifying at least 1 whisper flag or in dev mode
