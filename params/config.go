@@ -317,6 +317,7 @@ var (
 		big.NewInt(0), // PetersburgBlock
 		big.NewInt(0), // IstanbulBlock
 		big.NewInt(0), // MuirGlacierBlock
+		nil, // YoloV1Block
 		nil, // EWASMBlock
 
 		nil, // EIP160Block
