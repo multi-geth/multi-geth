@@ -16,6 +16,8 @@
 
 package params
 
+import "github.com/ethereum/go-ethereum/common"
+
 // MainnetBootnodes are the enode URLs of the P2P bootstrap nodes running on
 // the main Ethereum network.
 var MainnetBootnodes = []string{
@@ -69,12 +71,26 @@ var YoloV1Bootnodes = []string{
 
 const dnsPrefix = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@"
 
-// These DNS names provide bootstrap connectivity for public testnets and the mainnet.
-// See https://github.com/ethereum/discv4-dns-lists for more information.
-var MainnetKnownDNSNetwork = dnsPrefix + "all.mainnet.ethdisco.net"
-var RopstenKnownDNSNetwork = dnsPrefix + "all.ropsten.ethdisco.net"
-var RinkebyKnownDNSNetwork = dnsPrefix + "all.rinkeby.ethdisco.net"
-var GoerliKnownDNSNetwork  = dnsPrefix + "all.goerli.ethdisco.net"
+// KnownDNSNetwork returns the address of a public DNS-based node list for the given
+// genesis hash and protocol. See https://github.com/ethereum/discv4-dns-lists for more
+// information.
+func KnownDNSNetwork(genesis common.Hash, protocol string) string {
+	var net string
+	switch genesis {
+	case MainnetGenesisHash:
+		net = "mainnet"
+	case RopstenGenesisHash:
+		net = "ropsten"
+	case RinkebyGenesisHash:
+		net = "rinkeby"
+	case GoerliGenesisHash:
+		net = "goerli"
+	default:
+		return ""
+	}
+	return dnsPrefix + protocol + "." + net + ".ethdisco.net"
+}
+
 var ClassicKnownDNSNetwork = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.classic.blockd.info"
 var MordorKnownDNSNetwork  = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.mordor.blockd.info"
 var KottiKnownDNSNetwork   = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.kotti.blockd.info"

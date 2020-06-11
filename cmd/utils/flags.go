@@ -1632,7 +1632,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 3
 		}
 		cfg.Genesis = core.DefaultRopstenGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.RopstenKnownDNSNetwork)
+		setDNSDiscoveryDefaults(cfg, params.RopstenGenesisHash)
 	case ctx.GlobalBool(RinkebyFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 4
@@ -1640,7 +1640,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
 		cfg.Checkpoint = params.RinkebyTrustedCheckpoint
 		cfg.CheckpointOracle = params.RinkebyCheckpointOracle
-		setDNSDiscoveryDefaults(cfg, params.RinkebyKnownDNSNetwork)
+		setDNSDiscoveryDefaults(cfg, params.RinkebyGenesisHash)
 	case ctx.GlobalBool(GoerliFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 5
@@ -1648,7 +1648,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		cfg.Genesis = core.DefaultGoerliGenesisBlock()
 		cfg.Checkpoint = params.GoerliTrustedCheckpoint
 		cfg.CheckpointOracle = params.GoerliCheckpointOracle
-		setDNSDiscoveryDefaults(cfg, params.GoerliKnownDNSNetwork)
+		setDNSDiscoveryDefaults(cfg, params.GoerliGenesisHash)
 	case ctx.GlobalBool(YoloV1Flag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 133519467574833 // "yolov1"
@@ -1659,25 +1659,24 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 1
 		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.ClassicKnownDNSNetwork)
+		setDNSDiscoveryDefaultsAlt(cfg, params.ClassicKnownDNSNetwork)
 	case ctx.GlobalBool(MordorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7
 		}
 		cfg.Genesis = core.DefaultMordorGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.MordorKnownDNSNetwork)
+		setDNSDiscoveryDefaultsAlt(cfg, params.MordorKnownDNSNetwork)
 	case ctx.GlobalBool(KottiFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 6
 		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.KottiKnownDNSNetwork)
+		setDNSDiscoveryDefaultsAlt(cfg, params.KottiKnownDNSNetwork)
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7762959
 		}
 		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
-		setDNSDiscoveryDefaults(cfg, params.GoerliGenesisHash)
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
@@ -1706,7 +1705,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		}
 	default:
 		if cfg.NetworkId == 1 {
-			setDNSDiscoveryDefaults(cfg, params.MainnetKnownDNSNetwork)
+			setDNSDiscoveryDefaults(cfg, params.MainnetGenesisHash)
 		}
 	}
 }
@@ -1725,6 +1724,16 @@ func setDNSDiscoveryDefaults(cfg *eth.Config, genesis common.Hash) {
 	if url := params.KnownDNSNetwork(genesis, protocol); url != "" {
 		cfg.DiscoveryURLs = []string{url}
 	}
+}
+
+// setDNSDiscoveryDefaults configures DNS discovery with the given URL if
+// no URLs are set.
+func setDNSDiscoveryDefaultsAlt(cfg *eth.Config, url string) {
+	if cfg.DiscoveryURLs != nil {
+		return // already set through flags/config
+	}
+
+	cfg.DiscoveryURLs = []string{url}
 }
 
 // RegisterEthService adds an Ethereum client to the stack.
