@@ -154,7 +154,7 @@ func (s *LesServer) Protocols() []p2p.Protocol {
 			return p.Info()
 		}
 		return nil
-	})
+	}, nil)
 	// Add "les" ENR entries.
 	for i := range ps {
 		ps[i].Attributes = []enr.Entry{&lesEntry{}}
