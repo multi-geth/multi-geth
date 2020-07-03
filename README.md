@@ -17,9 +17,11 @@ Binary archives are published at https://github.com/multi-geth/multi-geth/releas
 
 Upstream development from [ethereum/go-ethereum](https://github.com/ethereum/go-ethereum) is merged to this repository regularly, usually at every upstream tagged release. Every effort is made to maintain seamless compatibility with upstream source, including compatible RPC, JS, and CLI APIs, data storage locations and schemas, and, of course, interoperable client protocols. Applicable bug reports, bug fixes, features, and proposals should be made upstream whenever possible.
 
+**After some careful considerations and delibrations, we have made the hard decision to deprecate ETC support, you can read more about the reasonings and rationales in this [Classic in Orbit blog post](https://that.world/~classic/2020/06/10/deprecate/).**
+
 ### Maintainers
 
-Special thanks to all maintainers of the MultiGeth project (ordered alphabetically):
+Special thanks to all maintainers who have participated or are still participating in the MultiGeth project (ordered alphabetically):
 
 * Code Shelter (Team)
 * Gödel Labs (Team)
