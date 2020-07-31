@@ -28,6 +28,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/cmd/utils"
 	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/params"
 	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
@@ -148,6 +149,9 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	stack, cfg := makeConfigNode(ctx)
 	if ctx.GlobalIsSet(utils.OpposePhoenixForkFlag.Name) {
 		params.ClassicChainConfig.IstanbulBlock = nil
+	}
+	if ctx.GlobalIsSet(utils.ClassicFlag.Name) {
+		log.Crit("Ethereum Classic support is removed in MultiGeth. For more information, please read the v1.9.18 release notes. https://github.com/multi-geth/multi-geth/releases/tag/v1.9.18")
 	}
 	utils.RegisterEthService(stack, &cfg.Eth)
 
