@@ -173,6 +173,8 @@ func ethFilter(args []string) (nodeFilter, error) {
 		filter = forkid.NewStaticFilter(params.KottiChainConfig, params.KottiGenesisHash)
 	case "musicoin":
 		filter = forkid.NewStaticFilter(params.MusicoinChainConfig, params.MusicoinGenesisHash)
+	case "ellaism":
+		filter = forkid.NewStaticFilter(params.EllaismChainConfig, params.MusicoinGenesisHash)
 	default:
 		return nil, fmt.Errorf("unknown network %q", args[0])
 	}

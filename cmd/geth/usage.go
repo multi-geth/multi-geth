@@ -88,6 +88,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MordorFlag,
 			utils.KottiFlag,
 			utils.MusicoinFlag,
+			utils.EllaismFlag,
 		},
 	},
 	{

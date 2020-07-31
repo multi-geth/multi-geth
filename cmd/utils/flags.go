@@ -197,6 +197,10 @@ var (
 		Name:  "musicoin",
 		Usage: "Musicoin network: pre-configured Musicoin mainnet",
 	}
+	EllaismFlag = cli.BoolFlag{
+		Name:  "ellaism",
+		Usage: "Ellaism network: pre-configured Ellaism mainnet",
+	}
 	DeveloperFlag = cli.BoolFlag{
 		Name:  "dev",
 		Usage: "Ephemeral proof-of-authority network with a pre-funded developer account, mining enabled",
@@ -783,6 +787,9 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(MusicoinFlag.Name) {
 			return filepath.Join(path, "musicoin")
 		}
+		if ctx.GlobalBool(EllaismFlag.Name) {
+			return filepath.Join(path, "ellaism")
+		}
 		return path
 	}
 	Fatalf("Cannot determine default data directory, please set manually (--datadir)")
@@ -849,6 +856,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.KottiBootnodes
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		urls = params.MusicoinBootnodes
+	case ctx.GlobalBool(EllaismFlag.Name):
+		urls = params.EllaismBootnodes
 	case cfg.BootstrapNodes != nil:
 		return // already set, don't apply defaults.
 	}
@@ -893,6 +902,8 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 		urls = params.KottiBootnodes
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		urls = params.MusicoinBootnodes
+	case ctx.GlobalBool(EllaismFlag.Name):
+		urls = params.EllaismBootnodes
 	case cfg.BootstrapNodesV5 != nil:
 		return // already set, don't apply defaults.
 	}
@@ -1333,6 +1344,8 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "kotti")
 	case ctx.GlobalBool(MusicoinFlag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "musicoin")
+	case ctx.GlobalBool(EllaismFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "ellaism")
 	}
 }
 
@@ -1677,6 +1690,11 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 7762959
 		}
 		cfg.Genesis = core.DefaultMusicoinGenesisBlock()
+	case ctx.GlobalBool(EllaismFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 64
+		}
+		cfg.Genesis = core.DefaultEllaismGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
@@ -1879,6 +1897,8 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 		genesis = core.DefaultKottiGenesisBlock()
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		genesis = core.DefaultMusicoinGenesisBlock()
+	case ctx.GlobalBool(EllaismFlag.Name):
+		genesis = core.DefaultEllaismGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}

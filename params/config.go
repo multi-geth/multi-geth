@@ -243,6 +243,8 @@ var (
 		nil, // EWASMBlock
 
 		nil, // EIP160Block
+		nil, // EIP161DisableBlock
+		nil, // EIP161ReenableBlock
 		nil, // ECIP1010PauseBlock
 		nil, // ECIP1010Length
 		nil, // ECIP1017EraBlock
@@ -283,6 +285,8 @@ var (
 		nil, // EWASMBlock
 
 		nil, // EIP160Block
+		nil, // EIP161DisableBlock
+		nil, // EIP161ReenableBlock
 		nil, // ECIP1010PauseBlock
 		nil, // ECIP1010Length
 		nil, // ECIP1017EraBlock
@@ -321,6 +325,8 @@ var (
 		nil, // EWASMBlock
 
 		nil, // EIP160Block
+		nil, // EIP161DisableBlock
+		nil, // EIP161ReenableBlock
 		nil, // ECIP1010PauseBlock
 		nil, // ECIP1010Length
 		nil, // ECIP1017EraBlock
@@ -415,11 +421,13 @@ type ChainConfig struct {
 	// (a.) varies from it's 'siblings', which have 'F's in them
 	// (b.) without the 'F' will vary from ETH implementations if they choose to accept the proposed changes
 	// with corresponding refactoring (https://github.com/ethereum/go-ethereum/pull/18401)
-	EIP160Block        *big.Int `json:"eip160Block,omitempty"`
-	ECIP1010PauseBlock *big.Int `json:"ecip1010PauseBlock,omitempty"` // ECIP1010 pause HF block
-	ECIP1010Length     *big.Int `json:"ecip1010Length,omitempty"`     // ECIP1010 length
-	ECIP1017EraBlock   *big.Int `json:"ecip1017EraBlock,omitempty"`   // ECIP1017 era rounds
-	DisposalBlock      *big.Int `json:"disposalBlock,omitempty"`      // Bomb disposal HF block
+	EIP160Block         *big.Int `json:"eip160Block,omitempty"`
+	EIP161DisableBlock  *big.Int `json:"eip161DisableBlock,omitempty"`
+	EIP161ReenableBlock *big.Int `json:"eip161ReenableBlock,omitempty"`
+	ECIP1010PauseBlock  *big.Int `json:"ecip1010PauseBlock,omitempty"` // ECIP1010 pause HF block
+	ECIP1010Length      *big.Int `json:"ecip1010Length,omitempty"`     // ECIP1010 length
+	ECIP1017EraBlock    *big.Int `json:"ecip1017EraBlock,omitempty"`   // ECIP1017 era rounds
+	DisposalBlock       *big.Int `json:"disposalBlock,omitempty"`      // Bomb disposal HF block
 
 	MCIP0Block *big.Int `json:"mcip0Block,omitempty"` // Musicoin default block; no MCIP, just denotes chain pref
 	MCIP3Block *big.Int `json:"mcip3Block,omitempty"` // Musicoin 'UBI Fork' block
@@ -559,6 +567,22 @@ func (c *ChainConfig) IsEIP160(num *big.Int) bool {
 	return isForked(c.EIP158Block, num) || isForked(c.EIP160Block, num)
 }
 
+func (c *ChainConfig) IsEIP161(num *big.Int) bool {
+	if isForked(c.EIP161ReenableBlock, num) {
+		return true
+	}
+
+	if isForked(c.EIP161DisableBlock, num) {
+		return false
+	}
+
+	if isForked(c.ByzantiumBlock, num) {
+		return true
+	}
+
+	return false
+}
+
 func (c *ChainConfig) IsBombDisposal(num *big.Int) bool {
 	return isForked(c.DisposalBlock, num)
 }
@@ -599,7 +623,7 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 		{name: "daoForkBlock", block: c.DAOForkBlock, optional: true},
 		{name: "eip150Block", block: c.EIP150Block},
 		{name: "eip155Block", block: c.EIP155Block},
-		{name: "eip158Block", block: c.EIP158Block},
+		{name: "eip158Block", block: c.EIP158Block, optional: true},
 		{name: "byzantiumBlock", block: c.ByzantiumBlock},
 		{name: "constantinopleBlock", block: c.ConstantinopleBlock},
 		{name: "petersburgBlock", block: c.PetersburgBlock},
@@ -739,7 +763,8 @@ type Rules struct {
 	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
 	IsYoloV1                                                bool
-	HasECIP1017, IsEIP160, IsBombDisposal, IsECIP1010       bool
+	HasECIP1017, IsEIP160, IsEIP161, IsBombDisposal         bool
+	IsECIP1010                                              bool
 	IsMCIP0, IsMCIP3, IsMCIP8                               bool
 }
 
