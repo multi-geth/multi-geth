@@ -30,9 +30,10 @@ Special thanks to all maintainers of the MultiGeth project (ordered alphabetical
 MultiGeth currently supports the following networks:
 
 * Ethereum mainnet: run without any additional parameters.
+* Ellaism mainnet: run with `--ellaism`.
+* Musicoin mainnet: run with `--musicoin`.
 * Ropsten testnet: run with `--testnet`.
 * Goerli testnet: run with `--goerli`.
-* Ethereum Classic mainnet: run with `--classic`.
 * Mordor testnet: run with `--mordor`.
 * Kotti testnet: run with `--kotti`.
 
