@@ -1662,16 +1662,12 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 4
 		}
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
-		cfg.Checkpoint = params.RinkebyTrustedCheckpoint
-		cfg.CheckpointOracle = params.RinkebyCheckpointOracle
 		setDNSDiscoveryDefaults(cfg, params.RinkebyGenesisHash)
 	case ctx.GlobalBool(GoerliFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 5
 		}
 		cfg.Genesis = core.DefaultGoerliGenesisBlock()
-		cfg.Checkpoint = params.GoerliTrustedCheckpoint
-		cfg.CheckpointOracle = params.GoerliCheckpointOracle
 		setDNSDiscoveryDefaults(cfg, params.GoerliGenesisHash)
 	case ctx.GlobalBool(YoloV1Flag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
@@ -1683,19 +1679,16 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 1
 		}
 		cfg.Genesis = core.DefaultClassicGenesisBlock()
-		setDNSDiscoveryDefaultsAlt(cfg, params.ClassicKnownDNSNetwork)
 	case ctx.GlobalBool(MordorFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7
 		}
 		cfg.Genesis = core.DefaultMordorGenesisBlock()
-		setDNSDiscoveryDefaultsAlt(cfg, params.MordorKnownDNSNetwork)
 	case ctx.GlobalBool(KottiFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 6
 		}
 		cfg.Genesis = core.DefaultKottiGenesisBlock()
-		setDNSDiscoveryDefaultsAlt(cfg, params.KottiKnownDNSNetwork)
 	case ctx.GlobalBool(MusicoinFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 7762959
@@ -1773,16 +1766,6 @@ func setDNSDiscoveryDefaults(cfg *eth.Config, genesis common.Hash) {
 	if url := params.KnownDNSNetwork(genesis, protocol); url != "" {
 		cfg.DiscoveryURLs = []string{url}
 	}
-}
-
-// setDNSDiscoveryDefaults configures DNS discovery with the given URL if
-// no URLs are set.
-func setDNSDiscoveryDefaultsAlt(cfg *eth.Config, url string) {
-	if cfg.DiscoveryURLs != nil {
-		return // already set through flags/config
-	}
-
-	cfg.DiscoveryURLs = []string{url}
 }
 
 // RegisterEthService adds an Ethereum client to the stack.

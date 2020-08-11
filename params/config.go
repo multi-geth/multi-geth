@@ -34,6 +34,24 @@ var (
 	YoloV1GenesisHash  = common.HexToHash("0xc3fd235071f24f93865b0850bd2a2119b30f7224d18a0e34c7bbf549ad7e3d36")
 )
 
+// TrustedCheckpoints associates each known checkpoint with the genesis hash of
+// the chain it belongs to.
+var TrustedCheckpoints = map[common.Hash]*TrustedCheckpoint{
+	MainnetGenesisHash: MainnetTrustedCheckpoint,
+	RopstenGenesisHash: RopstenTrustedCheckpoint,
+	RinkebyGenesisHash: RinkebyTrustedCheckpoint,
+	GoerliGenesisHash:  GoerliTrustedCheckpoint,
+}
+
+// CheckpointOracles associates each known checkpoint oracles with the genesis hash of
+// the chain it belongs to.
+var CheckpointOracles = map[common.Hash]*CheckpointOracleConfig{
+	MainnetGenesisHash: MainnetCheckpointOracle,
+	RopstenGenesisHash: RopstenCheckpointOracle,
+	RinkebyGenesisHash: RinkebyCheckpointOracle,
+	GoerliGenesisHash:  GoerliCheckpointOracle,
+}
+
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{

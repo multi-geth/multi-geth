@@ -90,7 +90,3 @@ func KnownDNSNetwork(genesis common.Hash, protocol string) string {
 	}
 	return dnsPrefix + protocol + "." + net + ".ethdisco.net"
 }
-
-var ClassicKnownDNSNetwork = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.classic.blockd.info"
-var MordorKnownDNSNetwork  = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.mordor.blockd.info"
-var KottiKnownDNSNetwork   = "enrtree://AJE62Q4DUX4QMMXEHCSSCSC65TDHZYSMONSD64P3WULVLSF6MRQ3K@all.kotti.blockd.info"
