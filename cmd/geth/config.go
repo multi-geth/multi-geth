@@ -29,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/cmd/utils"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/params"
 	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
@@ -105,6 +106,7 @@ func defaultNodeConfig() node.Config {
 	return cfg
 }
 
+// makeConfigNode loads geth configuration and creates a blank node instance.
 func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 	// Load defaults.
 	cfg := gethConfig{
@@ -145,15 +147,18 @@ func enableWhisper(ctx *cli.Context) bool {
 	return false
 }
 
-func makeFullNode(ctx *cli.Context) *node.Node {
-	stack, cfg := makeConfigNode(ctx)
+// makeFullNode loads geth configuration and creates the Ethereum backend.
+func makeFullNode(ctx *cli.Context) (*node.Node, ethapi.Backend) {
 	if ctx.GlobalIsSet(utils.OpposePhoenixForkFlag.Name) {
 		params.ClassicChainConfig.IstanbulBlock = nil
 	}
 	if ctx.GlobalIsSet(utils.ClassicFlag.Name) {
 		log.Crit("Ethereum Classic support is removed in MultiGeth. For more information, please read the v1.9.18 release notes. https://github.com/multi-geth/multi-geth/releases/tag/v1.9.18")
 	}
-	utils.RegisterEthService(stack, &cfg.Eth)
+
+	stack, cfg := makeConfigNode(ctx)
+
+	backend := utils.RegisterEthService(stack, &cfg.Eth)
 
 	// Whisper must be explicitly enabled by specifying at least 1 whisper flag or in dev mode
 	shhEnabled := enableWhisper(ctx)
@@ -172,13 +177,13 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	}
 	// Configure GraphQL if requested
 	if ctx.GlobalIsSet(utils.GraphQLEnabledFlag.Name) {
-		utils.RegisterGraphQLService(stack, cfg.Node.GraphQLEndpoint(), cfg.Node.GraphQLCors, cfg.Node.GraphQLVirtualHosts, cfg.Node.HTTPTimeouts)
+		utils.RegisterGraphQLService(stack, backend, cfg.Node)
 	}
 	// Add the Ethereum Stats daemon if requested.
 	if cfg.Ethstats.URL != "" {
-		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
+		utils.RegisterEthStatsService(stack, backend, cfg.Ethstats.URL)
 	}
-	return stack
+	return stack, backend
 }
 
 // dumpConfig is the dumpconfig command.
