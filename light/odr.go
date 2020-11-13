@@ -101,7 +101,7 @@ type CodeRequest struct {
 
 // StoreResult stores the retrieved data in local database
 func (req *CodeRequest) StoreResult(db ethdb.Database) {
-	db.Put(req.Hash[:], req.Data)
+	rawdb.WriteCode(db, req.Hash, req.Data)
 }
 
 // BlockRequest is the ODR request type for retrieving block bodies
@@ -133,7 +133,7 @@ func (req *ReceiptsRequest) StoreResult(db ethdb.Database) {
 	}
 }
 
-// ChtRequest is the ODR request type for state/storage trie entries
+// ChtRequest is the ODR request type for retrieving header by Canonical Hash Trie
 type ChtRequest struct {
 	Untrusted        bool   // Indicator whether the result retrieved is trusted or not
 	PeerId           string // The specified peer id from which to retrieve data.
